@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTech | Performance & Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-react/0.263.1/lucide-react.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .product-card:hover .product-img { transform: scale(1.05); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 13.1V16c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+            <span class="text-2xl font-bold tracking-tighter">AUTO<span class="text-blue-500">TECH</span></span>
+        </div>
+
+        <div class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
+            <a href="#" class="hover:text-white transition-colors">Performance</a>
+            <a href="#" class="hover:text-white transition-colors">Interior</a>
+            <a href="#" class="hover:text-white transition-colors">Exterior</a>
+            <a href="#" class="hover:text-white transition-colors">Lighting</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button id="cartBtn" class="relative p-2 hover:bg-white/10 rounded-full transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span id="cartCount" class="absolute -top-1 -right-1 bg-blue-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative h-[50vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10"></div>
+        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=2000" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="Hero background">
+        <div class="relative z-20 text-center px-4">
+            <h1 class="text-5xl md:text-7xl font-bold mb-4 tracking-tight">Level Up Your Drive.</h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">Premium parts, performance upgrades, and cutting-edge tech for the modern automotive enthusiast.</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-3xl font-bold">Featured Gear</h2>
+                <p class="text-slate-500">Hand-picked performance upgrades</p>
+            </div>
+            <div class="flex gap-2">
+                <select id="categoryFilter" class="bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-blue-500">
+                    <option value="all">All Categories</option>
+                    <option value="Performance">Performance</option>
+                    <option value="Interior">Interior</option>
+                    <option value="Exterior">Exterior</option>
+                    <option value="Tech">Tech</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Products will be injected here -->
+        </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full md:w-96 bg-slate-900 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 ease-in-out border-l border-white/10 flex flex-col">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h3 class="text-xl font-bold">Your Garage (Cart)</h3>
+            <button id="closeCart" class="p-2 hover:bg-white/10 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div id="cartItems" class="flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            <!-- Cart items injected here -->
+        </div>
+        <div class="p-6 border-t border-white/10 bg-slate-900/50">
+            <div class="flex justify-between mb-4">
+                <span class="text-slate-400">Subtotal</span>
+                <span id="cartTotal" class="font-bold text-xl">$0.00</span>
+            </div>
+            <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                Checkout Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-full border border-blue-500/50 text-sm font-medium opacity-0 transition-opacity duration-300 pointer-events-none z-[200]">
+        Added to cart!
+    </div>
+
+    <script>
+        const apiKey = ""; // Provided at runtime
+
+        const products = [
+            { id: 1, name: "Carbon Fiber Steering Wheel", category: "Interior", price: 899.00, prompt: "luxury carbon fiber sports car steering wheel with alcantara grips, professional product photography, dark background, 8k" },
+            { id: 2, name: "Stage 2 Turbocharger", category: "Performance", price: 1250.00, prompt: "high performance automotive turbocharger, metallic finish, precision engineered, studio lighting, technical photography" },
+            { id: 3, name: "Smart Dash Display", category: "Tech", price: 349.00, prompt: "modern digital car dashboard display showing telemetry, sleek design, glowing interface, automotive electronics" },
+            { id: 4, name: "Forge Alloy Wheels", category: "Exterior", price: 2100.00, prompt: "set of 4 matte black forged alloy racing wheels, aggressive design, studio lighting" },
+            { id: 5, name: "LED Matrix Headlights", category: "Exterior", price: 750.00, prompt: "modern automotive led matrix headlight assembly, glowing blue elements, high tech optics" },
+            { id: 6, name: "Performance Coilover Kit", category: "Performance", price: 1100.00, prompt: "set of adjustable racing coilovers for car suspension, yellow springs, blue anodized parts, professional photography" },
+            { id: 7, name: "Titanium Exhaust Tip", category: "Exterior", price: 180.00, prompt: "burnt titanium dual exhaust tips, blue and purple heat staining, polished metal, close up" },
+            { id: 8, name: "Recaro Racing Seat", category: "Interior", price: 950.00, prompt: "professional bucket racing seat, black leather with red stitching, carbon fiber back, studio lighting" }
+        ];
+
+        let cart = [];
+
+        async function generateImage(prompt) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: [{ prompt: prompt }],
+                        parameters: { sampleCount: 1 }
+                    })
+                });
+                const data = await response.json();
+                return `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+            } catch (error) {
+                console.error("Image generation failed", error);
+                return "https://via.placeholder.com/400x400?text=Auto+Part";
+            }
+        }
+
+        async function renderProducts(filter = "all") {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = Array(8).fill(0).map(() => `
+                <div class="animate-pulse bg-slate-900 rounded-2xl h-80 border border-white/5"></div>
+            `).join('');
+
+            const filtered = filter === "all" ? products : products.filter(p => p.category === filter);
+            
+            const html = await Promise.all(filtered.map(async (product) => {
+                const imgUrl = await generateImage(product.prompt);
+                return `
+                    <div class="product-card group bg-slate-900/50 rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-300">
+                        <div class="h-56 overflow-hidden relative bg-slate-800">
+                            <img src="${imgUrl}" alt="${product.name}" class="product-img w-full h-full object-cover transition-transform duration-500">
+                            <div class="absolute top-3 right-3">
+                                <span class="bg-slate-950/80 backdrop-blur-md text-[10px] uppercase tracking-widest px-2 py-1 rounded font-bold border border-white/10">${product.category}</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-1 group-hover:text-blue-400 transition-colors">${product.name}</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="text-blue-500 font-bold text-xl">$${product.price.toLocaleString()}</span>
+                                <button onclick="addToCart(${product.id})" class="bg-white/5 hover:bg-blue-600 p-2 rounded-lg transition-all group/btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:scale-110 transition-transform"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }));
+            
+            grid.innerHTML = html.join('');
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
+            showToast(`Added ${product.name} to garage`);
+        }
+
+        function updateCartUI() {
+            const count = document.getElementById('cartCount');
+            const itemsList = document.getElementById('cartItems');
+            const total = document.getElementById('cartTotal');
+            
+            count.innerText = cart.length;
+            
+            if (cart.length === 0) {
+                itemsList.innerHTML = `<div class="text-center py-12 text-slate-500 italic">Your garage is empty</div>`;
+                total.innerText = "$0.00";
+                return;
+            }
+
+            itemsList.innerHTML = cart.map((item, index) => `
+                <div class="flex gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
+                    <div class="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+                        <div class="w-full h-full bg-blue-900/20 flex items-center justify-center text-[10px] text-blue-400">PART</div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between">
+                            <h4 class="font-semibold text-sm">${item.name}</h4>
+                            <button onclick="removeFromCart(${index})" class="text-slate-500 hover:text-red-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                        <p class="text-blue-400 font-bold">$${item.price.toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const sum = cart.reduce((acc, curr) => acc + curr.price, 0);
+            total.innerText = `$${sum.toLocaleString()}`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        }
+
+        // Event Listeners
+        document.getElementById('cartBtn').addEventListener('click', () => {
+            document.getElementById('cartSidebar').classList.remove('translate-x-full');
+        });
+
+        document.getElementById('closeCart').addEventListener('click', () => {
+            document.getElementById('cartSidebar').classList.add('translate-x-full');
+        });
+
+        document.getElementById('categoryFilter').addEventListener('change', (e) => {
+            renderProducts(e.target.value);
+        });
+
+        // Initialize
+        window.onload = () => {
+            renderProducts();
+        };
+    </script>
+</body>
+</html>
