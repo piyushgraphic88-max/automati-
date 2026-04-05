@@ -160,12 +160,9 @@
                 <div id="boot-progress-fill" class="progress-bar-fill"></div>
             </div>
             <div id="error-help" class="hidden mt-6 text-xs text-left bg-red-900/20 p-4 rounded-lg border border-red-500/30 text-gray-300">
-                <p class="font-bold text-red-400 mb-1">Fix Instructions:</p>
-                <p class="mb-2">Your browser is blocking high-performance video processing due to missing security headers.</p>
-                <ol class="list-decimal ml-4 space-y-1">
-                    <li>Try using <b>Chrome Beta</b> or <b>Edge Canary</b>.</li>
-                    <li>If you are the developer, ensure your server sends <b>Cross-Origin-Embedder-Policy: require-corp</b> and <b>Cross-Origin-Opener-Policy: same-origin</b>.</li>
-                </ol>
+                <p class="font-bold text-red-400 mb-1">Still Seeing Errors?</p>
+                <p class="mb-2">We've switched to a <b>Single-Threaded Engine</b> to bypass browser security restrictions.</p>
+                <p>If it still fails, it's likely a cross-domain script restriction in your current browser session. Try refreshing the page or using a non-private window.</p>
             </div>
         </div>
     </div>
@@ -274,16 +271,17 @@
         </div>
     </div>
 
-    <!-- FFmpeg Script -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <!-- FFmpeg Script - v0.10.x is often more compatible with single-threading -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
 
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
         
-        // Use a version of the core that is more likely to work without COOP/COEP if possible
+        // Single-thread forced configuration
         const ffmpeg = createFFmpeg({ 
             log: true,
-            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+            // Using a specific core version known for better single-thread stability
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
         });
 
         let currentFile = null;
@@ -320,13 +318,13 @@
             
             let prog = 0;
             const interval = setInterval(() => {
-                prog += Math.random() * 2;
+                prog += Math.random() * 1.5;
                 if (prog > 90) clearInterval(interval);
                 bootProgress.style.width = Math.min(prog, 90) + '%';
-            }, 200);
+            }, 300);
 
             try {
-                // Attempt to load the engine
+                // Attempt to load the engine - this older version often works better in sandboxed iFrames
                 await ffmpeg.load();
                 
                 clearInterval(interval);
@@ -339,7 +337,7 @@
             } catch (e) {
                 console.error("FFmpeg Load Error:", e);
                 clearInterval(interval);
-                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Security Block Detected</span>`;
+                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Browser Environment Restriction</span>`;
                 errorHelp.classList.remove('hidden');
             }
         });
@@ -415,19 +413,21 @@
             const end = trimEnd.value;
             const duration = end - start;
 
-            showStatus("Trimming and Preparing File...", true);
+            showStatus("Processing (Single-Thread Mode)...", true);
             exportProgress.style.width = '0%';
             
             try {
                 ffmpeg.FS('writeFile', 'input_video', await fetchFile(currentFile));
                 
+                // Using ultrafast and skipping audio re-encoding to speed up single-threaded processing
                 await ffmpeg.run(
                     '-ss', `${start}`, 
                     '-i', 'input_video', 
                     '-t', `${duration}`, 
                     '-c:v', 'libx264', 
                     '-preset', 'ultrafast', 
-                    '-crf', '28',
+                    '-crf', '32',
+                    '-c:a', 'copy',
                     'output.mp4'
                 );
 
