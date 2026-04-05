@@ -153,11 +153,19 @@
         <button id="install-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-full font-semibold transition-transform active:scale-95">
             Install Video Engine
         </button>
-        <div id="boot-loader" class="hidden flex flex-col items-center w-64">
+        <div id="boot-loader" class="hidden flex flex-col items-center w-80">
             <div class="spinner mb-4"></div>
             <p class="text-sm text-gray-500 mb-2" id="loader-msg">Downloading WebAssembly cores...</p>
             <div class="progress-bar-bg">
                 <div id="boot-progress-fill" class="progress-bar-fill"></div>
+            </div>
+            <div id="error-help" class="hidden mt-6 text-xs text-left bg-red-900/20 p-4 rounded-lg border border-red-500/30 text-gray-300">
+                <p class="font-bold text-red-400 mb-1">Fix Instructions:</p>
+                <ol class="list-decimal ml-4 space-y-1">
+                    <li>Use <b>Chrome</b> or <b>Edge</b>.</li>
+                    <li>Ensure you are not in Incognito mode.</li>
+                    <li>If testing locally, enable <b>Cross-Origin Isolation</b> headers on your server.</li>
+                </ol>
             </div>
         </div>
     </div>
@@ -266,12 +274,18 @@
         </div>
     </div>
 
+    <!-- Script imports -->
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
         
-        const ffmpeg = createFFmpeg({ log: false });
+        // Configuration: Using single-threaded worker if SharedArrayBuffer is missing
+        const ffmpeg = createFFmpeg({ 
+            log: true,
+            mainName: 'main',
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
+        });
 
         let currentFile = null;
         let isLoaded = false;
@@ -282,6 +296,7 @@
         const bootLoader = document.getElementById('boot-loader');
         const loaderMsg = document.getElementById('loader-msg');
         const bootProgress = document.getElementById('boot-progress-fill');
+        const errorHelp = document.getElementById('error-help');
         const videoInput = document.getElementById('video-input');
         const mediaDropzone = document.getElementById('media-dropzone');
         const videoElement = document.getElementById('video-element');
@@ -304,16 +319,18 @@
             installBtn.classList.add('hidden');
             bootLoader.classList.remove('hidden');
             
-            // Artificial progress for UI feel during download
             let prog = 0;
             const interval = setInterval(() => {
-                prog += Math.random() * 5;
+                prog += Math.random() * 3;
                 if (prog > 90) clearInterval(interval);
                 bootProgress.style.width = Math.min(prog, 90) + '%';
-            }, 200);
+            }, 150);
 
             try {
+                // If SharedArrayBuffer is missing, we must use a single-threaded build or proxy
+                // Note: v0.11.6 usually requires COOP/COEP headers.
                 await ffmpeg.load();
+                
                 clearInterval(interval);
                 bootProgress.style.width = '100%';
                 isLoaded = true;
@@ -322,13 +339,15 @@
                     setTimeout(() => bootScreen.style.display = 'none', 500);
                 }, 400);
             } catch (e) {
-                loaderMsg.innerHTML = `<span class="text-red-400">Error: SharedArrayBuffer not supported. Use Chrome or Edge.</span>`;
+                console.error("FFmpeg Load Error:", e);
+                clearInterval(interval);
+                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Incompatible Browser Environment</span>`;
+                errorHelp.classList.remove('hidden');
             }
         });
 
-        // Track FFmpeg progress
         ffmpeg.setProgress(({ ratio }) => {
-            const p = Math.round(ratio * 100);
+            const p = Math.max(0, Math.min(100, Math.round(ratio * 100)));
             exportProgress.style.width = p + '%';
             percentText.innerText = p + '%';
         });
@@ -404,9 +423,16 @@
             try {
                 ffmpeg.FS('writeFile', 'input_video', await fetchFile(currentFile));
                 
-                // Using re-encoding for more precise cuts (slower but accurate)
-                // If you want instant speed but less accuracy, use '-c', 'copy'
-                await ffmpeg.run('-ss', `${start}`, '-i', 'input_video', '-t', `${duration}`, '-c:v', 'libx264', '-preset', 'ultrafast', 'output.mp4');
+                // Using ultrafast preset for performance
+                await ffmpeg.run(
+                    '-ss', `${start}`, 
+                    '-i', 'input_video', 
+                    '-t', `${duration}`, 
+                    '-c:v', 'libx264', 
+                    '-preset', 'ultrafast', 
+                    '-crf', '28',
+                    'output.mp4'
+                );
 
                 const data = ffmpeg.FS('readFile', 'output.mp4');
                 const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
@@ -418,6 +444,7 @@
                 showStatus("Success! Check your downloads.", false);
                 setTimeout(() => statusOverlay.style.display = 'none', 3000);
             } catch (error) {
+                console.error(error);
                 showStatus("Export Error. Check console.", false);
             }
         }
