@@ -161,10 +161,10 @@
             </div>
             <div id="error-help" class="hidden mt-6 text-xs text-left bg-red-900/20 p-4 rounded-lg border border-red-500/30 text-gray-300">
                 <p class="font-bold text-red-400 mb-1">Fix Instructions:</p>
+                <p class="mb-2">Your browser is blocking high-performance video processing due to missing security headers.</p>
                 <ol class="list-decimal ml-4 space-y-1">
-                    <li>Use <b>Chrome</b> or <b>Edge</b>.</li>
-                    <li>Ensure you are not in Incognito mode.</li>
-                    <li>If testing locally, enable <b>Cross-Origin Isolation</b> headers on your server.</li>
+                    <li>Try using <b>Chrome Beta</b> or <b>Edge Canary</b>.</li>
+                    <li>If you are the developer, ensure your server sends <b>Cross-Origin-Embedder-Policy: require-corp</b> and <b>Cross-Origin-Opener-Policy: same-origin</b>.</li>
                 </ol>
             </div>
         </div>
@@ -274,16 +274,15 @@
         </div>
     </div>
 
-    <!-- Script imports -->
+    <!-- FFmpeg Script -->
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
         
-        // Configuration: Using single-threaded worker if SharedArrayBuffer is missing
+        // Use a version of the core that is more likely to work without COOP/COEP if possible
         const ffmpeg = createFFmpeg({ 
             log: true,
-            mainName: 'main',
             corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
         });
 
@@ -321,14 +320,13 @@
             
             let prog = 0;
             const interval = setInterval(() => {
-                prog += Math.random() * 3;
+                prog += Math.random() * 2;
                 if (prog > 90) clearInterval(interval);
                 bootProgress.style.width = Math.min(prog, 90) + '%';
-            }, 150);
+            }, 200);
 
             try {
-                // If SharedArrayBuffer is missing, we must use a single-threaded build or proxy
-                // Note: v0.11.6 usually requires COOP/COEP headers.
+                // Attempt to load the engine
                 await ffmpeg.load();
                 
                 clearInterval(interval);
@@ -341,7 +339,7 @@
             } catch (e) {
                 console.error("FFmpeg Load Error:", e);
                 clearInterval(interval);
-                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Incompatible Browser Environment</span>`;
+                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Security Block Detected</span>`;
                 errorHelp.classList.remove('hidden');
             }
         });
@@ -423,7 +421,6 @@
             try {
                 ffmpeg.FS('writeFile', 'input_video', await fetchFile(currentFile));
                 
-                // Using ultrafast preset for performance
                 await ffmpeg.run(
                     '-ss', `${start}`, 
                     '-i', 'input_video', 
