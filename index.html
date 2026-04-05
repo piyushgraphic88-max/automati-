@@ -35,7 +35,6 @@
             border-radius: 10px;
         }
 
-        /* Timeline Range Styles */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -110,17 +109,36 @@
             @apply bg-white/10 text-purple-400;
         }
 
-        /* Message Overlay */
         #status-overlay {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            background: rgba(30, 30, 30, 0.9);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 24px;
+            border-radius: 12px;
+            background: rgba(20, 20, 20, 0.95);
             border: 1px solid #333;
             display: none;
             z-index: 100;
+            min-width: 300px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -135,15 +153,17 @@
         <button id="install-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-full font-semibold transition-transform active:scale-95">
             Install Video Engine
         </button>
-        <div id="boot-loader" class="hidden flex flex-col items-center">
+        <div id="boot-loader" class="hidden flex flex-col items-center w-64">
             <div class="spinner mb-4"></div>
-            <p class="text-sm text-gray-500">Downloading WebAssembly cores (approx. 25MB)...</p>
+            <p class="text-sm text-gray-500 mb-2" id="loader-msg">Downloading WebAssembly cores...</p>
+            <div class="progress-bar-bg">
+                <div id="boot-progress-fill" class="progress-bar-fill"></div>
+            </div>
         </div>
     </div>
 
     <!-- Main Editor Interface -->
     <div class="flex h-screen flex-col">
-        <!-- Header -->
         <header class="h-14 border-b border-white/10 flex items-center justify-between px-6 bg-zinc-900">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
@@ -158,9 +178,7 @@
             </div>
         </header>
 
-        <!-- Editor Body -->
         <div class="flex-1 flex overflow-hidden">
-            <!-- Sidebar -->
             <aside class="w-20 border-r border-white/5 bg-zinc-900 flex flex-col py-4 gap-2">
                 <button class="tool-btn active">
                     <i class="fas fa-folder-open text-xl"></i>
@@ -178,15 +196,8 @@
                     <i class="fas fa-music text-xl"></i>
                     <span>Audio</span>
                 </button>
-                <div class="mt-auto border-t border-white/5 pt-4">
-                    <button class="tool-btn opacity-50">
-                        <i class="fas fa-cog text-xl"></i>
-                        <span>Settings</span>
-                    </button>
-                </div>
             </aside>
 
-            <!-- Library / Asset Panel -->
             <aside class="w-72 bg-zinc-900/50 border-r border-white/5 p-4 flex flex-col">
                 <h3 class="text-sm font-semibold mb-4 text-gray-300">YOUR MEDIA</h3>
                 <div id="media-dropzone" class="border-2 border-dashed border-white/10 rounded-xl flex-1 flex flex-col items-center justify-center p-6 text-center hover:border-purple-500/50 transition-colors cursor-pointer group">
@@ -196,21 +207,21 @@
                     </div>
                     <p class="text-xs text-gray-500 font-medium leading-relaxed">Click to upload or drag & drop video</p>
                 </div>
-                <div id="media-list" class="mt-4 hidden space-y-2 overflow-y-auto custom-scroll">
-                    <!-- Media Items will appear here -->
-                </div>
+                <div id="media-list" class="mt-4 hidden space-y-2 overflow-y-auto custom-scroll"></div>
             </aside>
 
-            <!-- Preview & Controls -->
             <main class="flex-1 flex flex-col">
                 <div class="flex-1 video-preview-area">
                     <video id="video-element" preload="auto"></video>
                     
                     <div id="status-overlay">
-                        <p id="status-text" class="text-sm font-medium">Processing...</p>
+                        <p id="status-text" class="text-sm font-medium mb-2">Processing...</p>
+                        <div class="progress-bar-bg">
+                            <div id="export-progress-fill" class="progress-bar-fill"></div>
+                        </div>
+                        <p id="percent-text" class="text-[10px] text-gray-500 mt-2">0%</p>
                     </div>
 
-                    <!-- Floating Player Controls -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900/80 backdrop-blur-md px-6 py-2 rounded-full flex items-center gap-6 border border-white/10 shadow-2xl">
                         <button id="btn-backward" class="hover:text-purple-400 transition-colors"><i class="fas fa-backward"></i></button>
                         <button id="btn-play-pause" class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:bg-purple-400 transition-colors">
@@ -220,7 +231,6 @@
                     </div>
                 </div>
 
-                <!-- Timeline -->
                 <div class="timeline-container p-4 flex flex-col">
                     <div class="flex items-center justify-between mb-4 px-2">
                         <div class="flex gap-4">
@@ -236,11 +246,8 @@
                         </div>
                     </div>
 
-                    <!-- Range Selector / Timeline UI -->
                     <div class="relative h-20 bg-zinc-800/30 rounded-lg border border-white/5 overflow-hidden">
                         <div id="timeline-scrub" class="h-full bg-purple-500/10 absolute left-0 top-0 transition-all pointer-events-none" style="width: 0%"></div>
-                        
-                        <!-- Trim Markers -->
                         <div class="absolute inset-x-0 bottom-4 px-2">
                             <div class="flex flex-col gap-2">
                                 <div class="flex justify-between text-[10px] text-gray-500 mb-1">
@@ -253,41 +260,28 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Fake Waveform/Frame strip visual -->
-                        <div class="absolute inset-0 flex items-center justify-around opacity-20 pointer-events-none">
-                            <div class="w-1 h-8 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-12 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-6 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-10 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-8 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-14 bg-gray-500 rounded-full"></div>
-                            <div class="w-1 h-10 bg-gray-500 rounded-full"></div>
-                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <!-- Note: FFmpeg.wasm requires special cross-origin headers or a proxy, 
-         but for this demo we use the standard UMD build -->
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
     <script>
         const { createFFmpeg, fetchFile } = FFmpeg;
-        const ffmpeg = createFFmpeg({ log: true });
+        
+        const ffmpeg = createFFmpeg({ log: false });
 
-        // State
         let currentFile = null;
         let isLoaded = false;
-        let isPlaying = false;
+        let totalDuration = 0;
 
-        // Elements
         const bootScreen = document.getElementById('boot-screen');
         const installBtn = document.getElementById('install-btn');
         const bootLoader = document.getElementById('boot-loader');
+        const loaderMsg = document.getElementById('loader-msg');
+        const bootProgress = document.getElementById('boot-progress-fill');
         const videoInput = document.getElementById('video-input');
         const mediaDropzone = document.getElementById('media-dropzone');
         const videoElement = document.getElementById('video-element');
@@ -300,29 +294,46 @@
         const endVal = document.getElementById('end-val');
         const statusOverlay = document.getElementById('status-overlay');
         const statusText = document.getElementById('status-text');
+        const exportProgress = document.getElementById('export-progress-fill');
+        const percentText = document.getElementById('percent-text');
         const exportBtn = document.getElementById('export-btn');
         const trimBtn = document.getElementById('btn-trim');
 
-        // 1. Installation Sequence
+        // Installation Sequence
         installBtn.addEventListener('click', async () => {
             installBtn.classList.add('hidden');
             bootLoader.classList.remove('hidden');
-            document.getElementById('boot-text').innerText = "Installing core components...";
+            
+            // Artificial progress for UI feel during download
+            let prog = 0;
+            const interval = setInterval(() => {
+                prog += Math.random() * 5;
+                if (prog > 90) clearInterval(interval);
+                bootProgress.style.width = Math.min(prog, 90) + '%';
+            }, 200);
 
             try {
                 await ffmpeg.load();
+                clearInterval(interval);
+                bootProgress.style.width = '100%';
                 isLoaded = true;
-                bootScreen.style.opacity = '0';
-                setTimeout(() => bootScreen.style.display = 'none', 500);
+                setTimeout(() => {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => bootScreen.style.display = 'none', 500);
+                }, 400);
             } catch (e) {
-                console.error(e);
-                alert("Failed to load FFmpeg. Browsers like Chrome or Edge are recommended. Ensure SharedArrayBuffer is supported.");
+                loaderMsg.innerHTML = `<span class="text-red-400">Error: SharedArrayBuffer not supported. Use Chrome or Edge.</span>`;
             }
         });
 
-        // 2. Media Loading
+        // Track FFmpeg progress
+        ffmpeg.setProgress(({ ratio }) => {
+            const p = Math.round(ratio * 100);
+            exportProgress.style.width = p + '%';
+            percentText.innerText = p + '%';
+        });
+
         mediaDropzone.addEventListener('click', () => videoInput.click());
-        
         videoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) handleFile(file);
@@ -330,35 +341,20 @@
 
         function handleFile(file) {
             currentFile = file;
-            const url = URL.createObjectURL(file);
-            videoElement.src = url;
-            
-            // Show file in "Library"
-            const mediaList = document.getElementById('media-list');
+            videoElement.src = URL.createObjectURL(file);
+            document.getElementById('media-list').classList.remove('hidden');
             mediaDropzone.classList.add('hidden');
-            mediaList.classList.remove('hidden');
-            mediaList.innerHTML = `
-                <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex items-center gap-3">
-                    <div class="w-12 h-12 bg-black rounded flex items-center justify-center overflow-hidden">
-                        <i class="fas fa-video text-gray-600"></i>
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-xs font-semibold truncate">${file.name}</p>
-                        <p class="text-[10px] text-gray-500">${(file.size / (1024 * 1024)).toFixed(1)} MB</p>
-                    </div>
-                </div>
-            `;
-
+            
             videoElement.onloadedmetadata = () => {
-                durationTimeDisplay.innerText = formatTime(videoElement.duration);
-                trimStart.max = videoElement.duration;
-                trimEnd.max = videoElement.duration;
-                trimEnd.value = videoElement.duration;
+                totalDuration = videoElement.duration;
+                durationTimeDisplay.innerText = formatTime(totalDuration);
+                trimStart.max = totalDuration;
+                trimEnd.max = totalDuration;
+                trimEnd.value = totalDuration;
                 updateRangeDisplays();
             };
         }
 
-        // 3. Player Controls
         playPauseBtn.addEventListener('click', () => {
             if (videoElement.paused) {
                 videoElement.play();
@@ -373,96 +369,80 @@
             currentTimeDisplay.innerText = formatTime(videoElement.currentTime);
             const progress = (videoElement.currentTime / videoElement.duration) * 100;
             document.getElementById('timeline-scrub').style.width = `${progress}%`;
-            
-            // Auto-pause if outside trim area
             if (videoElement.currentTime > parseFloat(trimEnd.value)) {
                 videoElement.currentTime = parseFloat(trimStart.value);
             }
         });
 
-        // 4. Timeline Logic
         function updateRangeDisplays() {
             startVal.innerText = parseFloat(trimStart.value).toFixed(1);
             endVal.innerText = parseFloat(trimEnd.value).toFixed(1);
         }
 
         trimStart.addEventListener('input', () => {
-            if (parseFloat(trimStart.value) >= parseFloat(trimEnd.value)) {
-                trimStart.value = parseFloat(trimEnd.value) - 0.1;
-            }
+            if (parseFloat(trimStart.value) >= parseFloat(trimEnd.value)) trimStart.value = parseFloat(trimEnd.value) - 0.1;
             videoElement.currentTime = trimStart.value;
             updateRangeDisplays();
         });
 
         trimEnd.addEventListener('input', () => {
-            if (parseFloat(trimEnd.value) <= parseFloat(trimStart.value)) {
-                trimEnd.value = parseFloat(trimStart.value) + 0.1;
-            }
+            if (parseFloat(trimEnd.value) <= parseFloat(trimStart.value)) trimEnd.value = parseFloat(trimStart.value) + 0.1;
             videoElement.currentTime = trimEnd.value;
             updateRangeDisplays();
         });
 
-        // 5. Video Processing (FFmpeg)
-        async function processVideo(action) {
-            if (!currentFile) return showStatus("No video loaded!", 2000);
+        async function processVideo() {
+            if (!isLoaded || !currentFile) return;
             
             const start = trimStart.value;
             const end = trimEnd.value;
             const duration = end - start;
 
-            showStatus("Processing Video... Please wait.", 0);
+            showStatus("Trimming and Preparing File...", true);
+            exportProgress.style.width = '0%';
             
             try {
-                // Write original file to virtual FS
                 ffmpeg.FS('writeFile', 'input_video', await fetchFile(currentFile));
-
-                // Execute Trim
-                // -ss (start), -t (duration), -c copy (fast trim without re-encoding)
-                await ffmpeg.run('-i', 'input_video', '-ss', `${start}`, '-t', `${duration}`, '-c', 'copy', 'output.mp4');
-
-                // Read Result
-                const data = ffmpeg.FS('readFile', 'output.mp4');
                 
-                // Trigger Download
+                // Using re-encoding for more precise cuts (slower but accurate)
+                // If you want instant speed but less accuracy, use '-c', 'copy'
+                await ffmpeg.run('-ss', `${start}`, '-i', 'input_video', '-t', `${duration}`, '-c:v', 'libx264', '-preset', 'ultrafast', 'output.mp4');
+
+                const data = ffmpeg.FS('readFile', 'output.mp4');
                 const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `edited_${currentFile.name}`;
+                a.download = `clip_${currentFile.name}`;
                 a.click();
 
-                showStatus("Export Successful!", 3000);
+                showStatus("Success! Check your downloads.", false);
+                setTimeout(() => statusOverlay.style.display = 'none', 3000);
             } catch (error) {
-                console.error(error);
-                showStatus("Error during processing.", 3000);
+                showStatus("Export Error. Check console.", false);
             }
         }
 
-        exportBtn.addEventListener('click', () => processVideo('export'));
-        trimBtn.addEventListener('click', () => processVideo('trim'));
+        exportBtn.addEventListener('click', processVideo);
+        trimBtn.addEventListener('click', processVideo);
 
-        // Utility
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function showStatus(text, duration) {
+        function showStatus(text, showBar) {
             statusOverlay.style.display = 'block';
             statusText.innerText = text;
-            if (duration > 0) {
-                setTimeout(() => {
-                    statusOverlay.style.display = 'none';
-                }, duration);
-            }
+            document.querySelector('#status-overlay .progress-bar-bg').style.display = showBar ? 'block' : 'none';
+            percentText.style.display = showBar ? 'block' : 'none';
         }
 
-        // Navigation controls
         document.getElementById('btn-forward').addEventListener('click', () => videoElement.currentTime += 5);
         document.getElementById('btn-backward').addEventListener('click', () => videoElement.currentTime -= 5);
         document.getElementById('btn-reset').addEventListener('click', () => {
             trimStart.value = 0;
-            trimEnd.value = videoElement.duration;
+            trimEnd.value = totalDuration;
             updateRangeDisplays();
         });
     </script>
