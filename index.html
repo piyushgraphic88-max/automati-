@@ -1,481 +1,1705 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebStream Editor Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        :root {
-            --bg-main: #0f0f0f;
-            --bg-side: #1a1a1a;
-            --accent: #5e35b1;
-            --accent-hover: #7e57c2;
-            --timeline-bg: #121212;
-            --text-muted: #a0a0a0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreatorOS — YouTube Growth Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icon Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .monospace { font-family: 'JetBrains Mono', monospace; }
+    body { background: #000000; overflow-x: hidden; color: white; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: white;
-            overflow: hidden;
-            height: 100vh;
-        }
+    /* UI Components */
+    .glass {
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 10px;
-        }
+    /* Premium Wireframe Card Container matching the pitch-black screenshots styling */
+    .wireframe-content-box {
+      background: #090A0F; /* Premium deep black-grey block background */
+      border-radius: 12px;
+      color: #E2E8F0; /* Light text */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: var(--accent);
-            cursor: pointer;
-            -webkit-appearance: none;
-            margin-top: -6px;
-        }
+    /* Premium Horizontal Project Card Styles - Modern Dark Glassmorphism */
+    .project-pipeline-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      border-radius: 2rem;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .project-pipeline-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.35);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 24px 48px rgba(139, 92, 246, 0.08);
+    }
 
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease;
-        }
+    .gradient-text {
+      background: linear-gradient(135deg, #c084fc, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: var(--accent);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
+    /* Sidebar Items (Premium Dark High-Contrast Sidebar Styling) */
+    .sidebar-item { 
+      transition: all 0.2s ease; 
+      color: #94A3B8; /* Muted slate text */
+    }
+    .sidebar-item:hover { 
+      background: rgba(255, 255, 255, 0.05); 
+      transform: translateX(4px); 
+      color: #FFFFFF;
+    }
+    .active-nav {
+      background: rgba(139, 92, 246, 0.15) !important;
+      border: 1px solid rgba(139, 92, 246, 0.4) !important;
+      color: #c084fc !important;
+      font-weight: 700 !important;
+    }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+    /* Strategy Elements */
+    .pillar-tag {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      background: rgba(139, 92, 246, 0.1);
+      color: #A78BFA;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
 
-        .timeline-container {
-            height: 200px;
-            background: var(--timeline-bg);
-            border-top: 1px solid #222;
-        }
+    .kpi-track { height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+    .kpi-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .video-preview-area {
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+    /* Progress Circle */
+    .progress-circle-inline {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: conic-gradient(#8B5CF6 0%, rgba(255,255,255,0.08) 0);
+      display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .progress-circle-inline::after {
+      content: attr(data-progress);
+      position: absolute; width: 44px; height: 44px;
+      background: #0B0F19; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #c084fc;
+    }
 
-        #video-element {
-            max-height: 100%;
-            max-width: 100%;
-        }
+    /* Calendar inside black container */
+    .cal-date { font-size: 11px; padding: 12px 4px; border-radius: 12px; text-align: center; color: #94A3B8; transition: all 0.2s; cursor: pointer; }
+    .cal-date:hover { background: rgba(255, 255, 255, 0.08); color: white; }
+    .cal-date.active { background: #8B5CF6; color: white !important; font-weight: 700; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4); }
+    .cal-date.has-event { color: #8B5CF6; font-weight: 700; position: relative; }
+    .cal-date.has-event::after { 
+      content: ''; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; background: #8B5CF6; border-radius: 50%; 
+    }
 
-        .tool-btn {
-            @apply flex flex-col items-center justify-center p-3 rounded-lg transition-all hover:bg-white/5 text-xs gap-1;
-        }
-        
-        .tool-btn.active {
-            @apply bg-white/10 text-purple-400;
-        }
+    .task-text.completed { text-decoration: line-through; opacity: 0.4; }
 
-        #status-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 24px;
-            border-radius: 12px;
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid #333;
-            display: none;
-            z-index: 100;
-            min-width: 300px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.01); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.6); }
 
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: #222;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 12px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-    </style>
+    .chat-bubble-ai { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); }
+    .chat-bubble-user { background: linear-gradient(135deg,#8B5CF6,#3B82F6); }
+  </style>
 </head>
-<body>
+<body class="h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Loading/Installation Screen -->
-    <div id="boot-screen">
-        <div class="mb-6 text-center">
-            <h1 class="text-3xl font-bold mb-2">WebStream Editor</h1>
-            <p class="text-gray-400" id="boot-text">Ready to initialize engine</p>
+<div class="flex h-full w-full overflow-hidden">
+
+  <!-- Sidebar (Updated to premium-black custom sidebar layout) -->
+  <aside class="w-72 bg-[#050508] p-8 flex flex-col z-20 shrink-0 hidden md:flex border-r border-white/10">
+    <div class="mb-12 pl-2">
+      <h1 class="text-4xl font-extrabold tracking-tight text-white uppercase">LOGO</h1>
+    </div>
+
+    <nav class="space-y-2 flex-1 overflow-y-auto pr-1">
+      <button onclick="showPage('home', this)" class="nav-btn sidebar-item active-nav w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="home" class="w-4 h-4"></i> Homepage
+      </button>
+      <button onclick="showPage('strategy', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="target" class="w-4 h-4"></i> Strategy & planing
+      </button>
+      <button onclick="showPage('ideation', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="lightbulb" class="w-4 h-4"></i> ideation
+      </button>
+      <button onclick="showPage('calendar', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="calendar" class="w-4 h-4"></i> Content Calendar
+      </button>
+      <button onclick="showPage('pipeline', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="clapperboard" class="w-4 h-4"></i> Prodution & excution
+      </button>
+      <button onclick="showPage('analytics', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Analytics
+      </button>
+      <button onclick="showPage('coach', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="bot" class="w-4 h-4"></i> AI Coach
+      </button>
+      <button onclick="showPage('settings', this)" class="nav-btn sidebar-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold border border-transparent">
+        <i data-lucide="settings" class="w-4 h-4"></i> Settings
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer / Quick Channel Stats -->
+    <div class="mt-auto pt-6 border-t border-white/10 space-y-3">
+      <div class="flex justify-between items-center text-xs text-gray-400">
+        <span>Synced Channel</span>
+        <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+      </div>
+      <div class="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/5">
+        <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs text-white">Y</div>
+        <div class="truncate">
+          <p id="channelNameDisplay" class="text-xs font-bold truncate text-white">Alex Tech Labs</p>
+          <p class="text-[10px] text-gray-400">Tech & Design</p>
         </div>
-        <button id="install-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-full font-semibold transition-transform active:scale-95">
-            Install Video Engine
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Top Bar/Nav Header -->
+  <div class="md:hidden glass fixed top-0 left-0 right-0 h-16 px-4 flex items-center justify-between z-30 border-b border-white/10">
+    <div class="flex items-center gap-2">
+      <span class="text-lg font-bold text-white uppercase">LOGO</span>
+    </div>
+    <div class="flex gap-1.5" id="mobileMenu">
+      <select onchange="handleMobileNav(this)" class="bg-slate-950 border border-purple-500/30 text-xs px-3 py-1.5 rounded-lg text-purple-200 outline-none">
+        <option value="home">🏠 Homepage</option>
+        <option value="strategy">🎯 Strategy & planing</option>
+        <option value="ideation">🚀 ideation</option>
+        <option value="calendar">📅 Content Calendar</option>
+        <option value="pipeline">🎬 Prodution & excution</option>
+        <option value="analytics">📈 Analytics</option>
+        <option value="coach">🤖 AI Coach</option>
+        <option value="settings">⚙️ Settings</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto flex flex-col pt-16 md:pt-0">
+    
+    <!-- Top Global Header -->
+    <header class="glass sticky top-0 z-10 border-b border-white/10 px-8 py-4 flex items-center justify-between">
+      <div>
+        <h2 id="pageTitle" class="text-xl md:text-2xl font-bold tracking-tight">Homepage</h2>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden sm:block">
+          <input type="text" id="globalSearch" placeholder="Search strategy or ideas..." class="bg-white/5 border border-white/10 pl-10 pr-4 py-2 rounded-xl text-xs outline-none w-56 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white placeholder-gray-500" oninput="searchFilterEverything()" />
+          <span class="absolute left-3.5 top-2.5 text-xs opacity-55">🔍</span>
+        </div>
+        <button onclick="triggerQuickIdea()" class="bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 border border-purple-500/30 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-lg shadow-purple-600/10">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Quick Idea
         </button>
-        <div id="boot-loader" class="hidden flex flex-col items-center w-80">
-            <div class="spinner mb-4"></div>
-            <p class="text-sm text-gray-500 mb-2" id="loader-msg">Downloading WebAssembly cores...</p>
-            <div class="progress-bar-bg">
-                <div id="boot-progress-fill" class="progress-bar-fill"></div>
-            </div>
-            <div id="error-help" class="hidden mt-6 text-xs text-left bg-red-900/20 p-4 rounded-lg border border-red-500/30 text-gray-300">
-                <p class="font-bold text-red-400 mb-1">Still Seeing Errors?</p>
-                <p class="mb-2">The browser is still blocking the multi-threaded WASM core. We have attempted to force <b>Single-Threaded Mode</b>.</p>
-                <p class="mb-2 italic opacity-80 text-[10px]">Technical Note: Cross-Origin Resource Sharing (CORS) or COOP/COEP headers are missing on the host server.</p>
-                <p>Try one of these fixes:</p>
-                <ul class="list-disc ml-4 mt-2 space-y-1">
-                    <li>Open this page in a <b>New Tab</b> (incognito often helps).</li>
-                    <li>If on Chrome, ensure "Experimental WebAssembly" isn't disabled.</li>
-                    <li>Refresh the preview frame.</li>
-                </ul>
-            </div>
+        <button onclick="toggleNotification()" class="glass p-2 rounded-xl text-xs relative hover:bg-white/5">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center font-extrabold text-sm border border-white/10">A</div>
+      </div>
+    </header>
+
+    <!-- Notification Toast Widget -->
+    <div id="notifWidget" class="hidden fixed top-18 right-8 z-50 w-80 glass p-4 rounded-2xl border border-purple-500/30 shadow-2xl space-y-3.5">
+      <div class="flex justify-between items-center pb-2 border-b border-white/5">
+        <h4 class="font-bold text-xs text-purple-300">Notifications</h4>
+        <button onclick="toggleNotification()" class="text-[10px] text-gray-400 hover:text-white">Close</button>
+      </div>
+      <div class="space-y-2 text-xs" id="notificationList">
+        <div class="p-2 bg-white/5 rounded-lg border-l-2 border-purple-500">
+          <p class="font-semibold text-gray-200">New comment pattern found!</p>
+          <p class="text-[10px] text-gray-400 mt-0.5">AI suggests a video on "AI Side Hustles".</p>
         </div>
+        <div class="p-2 bg-white/5 rounded-lg border-l-2 border-blue-500">
+          <p class="font-semibold text-gray-200">Weekly Analytics Report ready</p>
+          <p class="text-[10px] text-gray-400 mt-0.5">CTR has averaged peak values on Fridays.</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Main Editor Interface -->
-    <div class="flex h-screen flex-col">
-        <header class="h-14 border-b border-white/10 flex items-center justify-between px-6 bg-zinc-900">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
-                    <i class="fas fa-play text-xs"></i>
-                </div>
-                <span class="font-bold tracking-tight">WebStream Pro</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="export-btn" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-medium flex items-center gap-2">
-                    <i class="fas fa-file-export"></i> Export
-                </button>
-            </div>
-        </header>
+    <div class="p-6 md:p-8 flex-1">
 
-        <div class="flex-1 flex overflow-hidden">
-            <aside class="w-20 border-r border-white/5 bg-zinc-900 flex flex-col py-4 gap-2">
-                <button class="tool-btn active">
-                    <i class="fas fa-folder-open text-xl"></i>
-                    <span>Media</span>
-                </button>
-                <button class="tool-btn">
-                    <i class="fas fa-cut text-xl"></i>
-                    <span>Edit</span>
-                </button>
-                <button class="tool-btn">
-                    <i class="fas fa-font text-xl"></i>
-                    <span>Text</span>
-                </button>
-                <button class="tool-btn">
-                    <i class="fas fa-music text-xl"></i>
-                    <span>Audio</span>
-                </button>
-            </aside>
-
-            <aside class="w-72 bg-zinc-900/50 border-r border-white/5 p-4 flex flex-col">
-                <h3 class="text-sm font-semibold mb-4 text-gray-300">YOUR MEDIA</h3>
-                <div id="media-dropzone" class="border-2 border-dashed border-white/10 rounded-xl flex-1 flex flex-col items-center justify-center p-6 text-center hover:border-purple-500/50 transition-colors cursor-pointer group">
-                    <input type="file" id="video-input" class="hidden" accept="video/*">
-                    <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-plus text-gray-400"></i>
-                    </div>
-                    <p class="text-xs text-gray-500 font-medium leading-relaxed">Click to upload or drag & drop video</p>
-                </div>
-                <div id="media-list" class="mt-4 hidden space-y-2 overflow-y-auto custom-scroll"></div>
-            </aside>
-
-            <main class="flex-1 flex flex-col">
-                <div class="flex-1 video-preview-area">
-                    <video id="video-element" preload="auto"></video>
-                    
-                    <div id="status-overlay">
-                        <p id="status-text" class="text-sm font-medium mb-2">Processing...</p>
-                        <div class="progress-bar-bg">
-                            <div id="export-progress-fill" class="progress-bar-fill"></div>
-                        </div>
-                        <p id="percent-text" class="text-[10px] text-gray-500 mt-2">0%</p>
-                    </div>
-
-                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900/80 backdrop-blur-md px-6 py-2 rounded-full flex items-center gap-6 border border-white/10 shadow-2xl">
-                        <button id="btn-backward" class="hover:text-purple-400 transition-colors"><i class="fas fa-backward"></i></button>
-                        <button id="btn-play-pause" class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:bg-purple-400 transition-colors">
-                            <i class="fas fa-play pl-1"></i>
-                        </button>
-                        <button id="btn-forward" class="hover:text-purple-400 transition-colors"><i class="fas fa-forward"></i></button>
-                    </div>
-                </div>
-
-                <div class="timeline-container p-4 flex flex-col">
-                    <div class="flex items-center justify-between mb-4 px-2">
-                        <div class="flex gap-4">
-                            <button id="btn-trim" class="text-xs bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded flex items-center gap-2 border border-white/5">
-                                <i class="fas fa-scissors text-purple-400"></i> Trim to Selection
-                            </button>
-                            <button id="btn-reset" class="text-xs bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded flex items-center gap-2 border border-white/5">
-                                <i class="fas fa-undo"></i> Reset
-                            </button>
-                        </div>
-                        <div class="text-xs font-mono text-gray-400">
-                            <span id="current-time">00:00</span> / <span id="duration-time">00:00</span>
-                        </div>
-                    </div>
-
-                    <div class="relative h-20 bg-zinc-800/30 rounded-lg border border-white/5 overflow-hidden">
-                        <div id="timeline-scrub" class="h-full bg-purple-500/10 absolute left-0 top-0 transition-all pointer-events-none" style="width: 0%"></div>
-                        <div class="absolute inset-x-0 bottom-4 px-2">
-                            <div class="flex flex-col gap-2">
-                                <div class="flex justify-between text-[10px] text-gray-500 mb-1">
-                                    <span>Start: <span id="start-val">0</span>s</span>
-                                    <span>End: <span id="end-val">0</span>s</span>
-                                </div>
-                                <div class="relative h-2">
-                                    <input type="range" id="trim-start" step="0.1" value="0" class="absolute z-10">
-                                    <input type="range" id="trim-end" step="0.1" value="100" class="absolute z-20">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Use FFmpeg v0.10.1 specifically for maximum compatibility with single-thread/non-header environments -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js"></script>
-
-    <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
+      <!-- 1. HOME PAGE -->
+      <section id="home" class="page space-y-6">
         
-        // Single-thread forced configuration with specific versioning
-        const ffmpeg = createFFmpeg({ 
-            log: true,
-            // Point to a core that supports the UMD (Universal Module Definition) which is less prone to CORS header strictness
-            corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js',
-        });
+        <!-- Premium Welcome Banner -->
+        <div class="glass rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="space-y-2 relative z-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-1">Welcome back, <span class="gradient-text" id="usernameBanner">Alex</span></h1>
+            <p class="text-gray-300 text-sm md:text-base">Your channel grew <span class="text-green-400 font-extrabold">+18.4%</span> this month. Here is your channel command overview.</p>
+          </div>
+          <div class="shrink-0 flex gap-3 z-10">
+            <button onclick="showPage('ideation', document.querySelector('[onclick*=\'ideation\']'))" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 px-5 py-3 rounded-2xl text-xs font-bold transition-all shadow-lg shadow-purple-600/30 flex items-center gap-1.5">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i> Generate Ideas
+            </button>
+            <button onclick="showPage('pipeline', document.querySelector('[onclick*=\'pipeline\']'))" class="glass px-5 py-3 rounded-2xl text-xs font-bold hover:bg-white/5 transition-all flex items-center gap-1.5">
+              <i data-lucide="clapperboard" class="w-4 h-4"></i> View Production & Execution
+            </button>
+          </div>
+          <div class="absolute right-0 bottom-0 w-80 h-80 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        </div>
 
-        let currentFile = null;
-        let isLoaded = false;
-        let totalDuration = 0;
+        <!-- Premium Real-time Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass rounded-3xl p-6 border-l-4 border-purple-500">
+            <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Subscribers</p>
+            <h3 class="text-3xl md:text-4xl font-extrabold mt-2 tracking-tight" id="statSubs">124,802</h3>
+            <span class="text-xs text-green-400 font-semibold mt-1 inline-block">↑ 4,220 this week</span>
+          </div>
+          <div class="glass rounded-3xl p-6 border-l-4 border-blue-500">
+            <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Monthly Views</p>
+            <h3 class="text-3xl md:text-4xl font-extrabold mt-2 tracking-tight" id="statViews">3.8M</h3>
+            <span class="text-xs text-blue-400 font-semibold mt-1 inline-block">↑ 12.5% vs last month</span>
+          </div>
+          <div class="glass rounded-3xl p-6 border-l-4 border-emerald-500">
+            <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Est. Revenue</p>
+            <h3 class="text-3xl md:text-4xl font-extrabold mt-2 tracking-tight" id="statRev">$14,820</h3>
+            <span class="text-xs text-emerald-400 font-semibold mt-1 inline-block">↑ $1,400 projected surplus</span>
+          </div>
+          <div class="glass rounded-3xl p-6 border-l-4 border-amber-500">
+            <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Avg Impression CTR</p>
+            <h3 class="text-3xl md:text-4xl font-extrabold mt-2 tracking-tight">8.12%</h3>
+            <span class="text-xs text-amber-400 font-semibold mt-1 inline-block">Top 5% in tech niche</span>
+          </div>
+        </div>
 
-        const bootScreen = document.getElementById('boot-screen');
-        const installBtn = document.getElementById('install-btn');
-        const bootLoader = document.getElementById('boot-loader');
-        const loaderMsg = document.getElementById('loader-msg');
-        const bootProgress = document.getElementById('boot-progress-fill');
-        const errorHelp = document.getElementById('error-help');
-        const videoInput = document.getElementById('video-input');
-        const mediaDropzone = document.getElementById('media-dropzone');
-        const videoElement = document.getElementById('video-element');
-        const playPauseBtn = document.getElementById('btn-play-pause');
-        const currentTimeDisplay = document.getElementById('current-time');
-        const durationTimeDisplay = document.getElementById('duration-time');
-        const trimStart = document.getElementById('trim-start');
-        const trimEnd = document.getElementById('trim-end');
-        const startVal = document.getElementById('start-val');
-        const endVal = document.getElementById('end-val');
-        const statusOverlay = document.getElementById('status-overlay');
-        const statusText = document.getElementById('status-text');
-        const exportProgress = document.getElementById('export-progress-fill');
-        const percentText = document.getElementById('percent-text');
-        const exportBtn = document.getElementById('export-btn');
-        const trimBtn = document.getElementById('btn-trim');
+        <!-- Two column interactive center -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 glass rounded-3xl p-6">
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <h3 class="text-lg font-bold">Subscribers Milestones Tracking</h3>
+                <p class="text-xs text-gray-400">Past 6 Months channel velocity yield curve.</p>
+              </div>
+              <span class="text-xs text-purple-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 bg-purple-500 rounded-full animate-ping"></span> Live Feed</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="growthChartHome"></canvas>
+            </div>
+          </div>
 
-        // Installation Sequence
-        installBtn.addEventListener('click', async () => {
-            installBtn.classList.add('hidden');
-            bootLoader.classList.remove('hidden');
+          <div class="lg:col-span-5 glass rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+              <h3 class="text-lg font-bold mb-1">Viral Potential Audit</h3>
+              <p class="text-xs text-gray-400 mb-4">Complete these tasks to increase high retention likelihood.</p>
+              
+              <div class="space-y-3">
+                <div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                  <span class="text-xs text-gray-200">First 15-second hook dynamic pacing audit</span>
+                  <span class="text-[9px] bg-purple-500/20 text-purple-300 font-bold py-0.5 px-2 rounded uppercase">92% Match</span>
+                </div>
+                <div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                  <span class="text-xs text-gray-200">High-contrast thumbnail mobile check (100px size)</span>
+                  <span class="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold py-0.5 px-2 rounded uppercase">Passed</span>
+                </div>
+                <div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                  <span class="text-xs text-gray-200">Double Hook loop script integration (Min 3 per video)</span>
+                  <span class="text-[9px] bg-amber-500/20 text-amber-300 font-bold py-0.5 px-2 rounded uppercase">Pending</span>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="showPage('coach', document.querySelector('[onclick*=\'coach\']'))" class="mt-6 w-full text-center bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs py-3 rounded-2xl font-bold transition-all text-purple-300 flex items-center justify-center gap-1.5">
+              <i data-lucide="zap" class="w-4 h-4"></i> Launch AI Script Critique Audit
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PRODUCTION & EXECUTION (Houses the premium black wireframe layout with interactive Assignment and Task Hub) -->
+      <section id="pipeline" class="page hidden space-y-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- LEFT SIDEBAR SECTION: Calendar Box + Chronological May Checklist -->
+          <div class="lg:col-span-4 space-y-6">
             
-            let prog = 0;
-            const interval = setInterval(() => {
-                prog += Math.random() * 1.5;
-                if (prog > 90) clearInterval(interval);
-                bootProgress.style.width = Math.min(prog, 90) + '%';
-            }, 300);
+            <!-- Styled Wireframe 'calender' Widget Block (Premium Deep Dark Black) -->
+            <div class="wireframe-content-box p-6 shadow-lg border border-white/10">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-extrabold uppercase text-white tracking-widest flex items-center gap-2">
+                  <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i> calender
+                </h3>
+                <span class="text-[10px] bg-white/10 text-gray-300 px-2.5 py-1 rounded font-bold border border-white/10">May 2026</span>
+              </div>
+              
+              <!-- Interactive Mini Wireframe Calendar Layout -->
+              <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1" id="wireframeCalGrid">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
 
-            try {
-                // FORCE Single thread by explicitly telling ffmpeg not to use workers if it fails initially
-                // Many browsers block worker creation from blob URLs or unsecure origins
-                await ffmpeg.load();
+            <!-- May Dates Chronological Checklist -->
+            <div class="space-y-6">
+              
+              <!-- Date Block 1 -->
+              <div>
+                <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> may 2 2026
+                </h3>
+                <div class="space-y-3 pl-3">
+                  <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" checked class="mt-1 w-4 h-4 rounded text-purple-600 bg-white/10 border-white/20 focus:ring-purple-500" />
+                    <div>
+                      <p class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Script Hook Strategy</p>
+                      <p class="text-[10px] text-gray-400">Assemble first 15 seconds drop patterns</p>
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" checked class="mt-1 w-4 h-4 rounded text-purple-600 bg-white/10 border-white/20 focus:ring-purple-500" />
+                    <div>
+                      <p class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">A/B Testing Thumbnail Draft</p>
+                      <p class="text-[10px] text-gray-400">Prepare initial layout concepts</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Date Block 2 -->
+              <div>
+                <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> may 3 2026
+                </h3>
+                <div class="space-y-3 pl-3">
+                  <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" class="mt-1 w-4 h-4 rounded text-purple-600 bg-white/10 border-white/20 focus:ring-purple-500" />
+                    <div>
+                      <p class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Shoot Primary Content</p>
+                      <p class="text-[10px] text-gray-400">Record screens and premium face footage</p>
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" class="mt-1 w-4 h-4 rounded text-purple-600 bg-white/10 border-white/20 focus:ring-purple-500" />
+                    <div>
+                      <p class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Final Post Production edit</p>
+                      <p class="text-[10px] text-gray-400">Inject custom sound design blocks</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- RIGHT PIPELINE SECTION: Video Pipeline with screenshot-style split layout -->
+          <div class="lg:col-span-8 space-y-6">
+            
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
+              <h2 class="text-xl font-bold text-white flex items-center gap-2 tracking-wide">
+                <i data-lucide="clapperboard" class="w-5 h-5 text-purple-400"></i> Video Pipeline
+              </h2>
+              
+              <!-- Custom Matrix status tracker bar -->
+              <div class="flex items-center gap-3 bg-white/5 border border-white/10 text-white rounded-md py-1.5 px-4 font-mono text-xs font-bold">
+                <span class="text-gray-400 uppercase tracking-widest">matrix</span>
+                <span class="text-purple-400" id="matrixStateTracker">3/5</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Pipeline Cards Styled EXACTLY like screenshot wireframe -->
+            <div class="space-y-6" id="interactiveVideoPipelineContainer">
+              <!-- Rendered Dynamically via JS -->
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- 3. MONTHLY STRATEGY & PLANNING -->
+      <section id="strategy" class="page hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          
+          <!-- Left: Strategy (60%) -->
+          <div class="lg:col-span-3 space-y-6">
+            <div class="glass rounded-3xl p-6 md:p-8">
+              <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">🎯 May 2026 Strategy & Planning</h2>
+              <p class="text-gray-400 text-sm mb-6">Aggressive 30-day growth sprint focused on high-retention discovery content.</p>
+              
+              <!-- Strategy Metrics -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white/5 border border-white/10 p-4.5 rounded-2xl flex items-center gap-4">
+                  <div id="mainCircle" class="progress-circle-inline" data-progress="0%"></div>
+                  <div>
+                    <h5 class="text-[10px] text-gray-400 uppercase font-extrabold tracking-wider">Upload Goal</h5>
+                    <p class="text-base font-extrabold">12 Videos / Mo</p>
+                    <p class="text-[11px] text-gray-500" id="plannedCountLabel">7 items planned</p>
+                  </div>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4.5 rounded-2xl flex flex-col justify-center">
+                  <div class="flex justify-between items-center">
+                    <h5 class="text-[10px] text-gray-400 uppercase font-extrabold tracking-wider">CTR Benchmark</h5>
+                    <span class="text-green-400 text-xs font-bold">↑ 0.2%</span>
+                  </div>
+                  <p class="text-lg font-bold mt-1">6.4% <span class="text-gray-400 text-xs font-normal">Average</span></p>
+                  <div class="kpi-track mt-2"><div class="kpi-fill bg-green-500" style="width: 64%"></div></div>
+                </div>
+              </div>
+
+              <!-- Content Split -->
+              <div class="space-y-4 mb-8">
+                <h3 class="font-bold text-sm text-gray-200">Portfolio Content Target Distribution</h3>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1.5"><span class="text-gray-400">Proven Topics (SEO)</span><span class="font-bold text-purple-300">70%</span></div>
+                    <div class="kpi-track"><div class="kpi-fill bg-purple-500" style="width: 70%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1.5"><span class="text-gray-400">Experimental (Viral Discovery)</span><span class="font-bold text-blue-300">20%</span></div>
+                    <div class="kpi-track"><div class="kpi-fill bg-blue-500" style="width: 20%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1.5"><span class="text-gray-400">Trending Hooks</span><span class="font-bold text-amber-300">10%</span></div>
+                    <div class="kpi-track"><div class="kpi-fill bg-amber-500" style="width: 10%"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pillars -->
+              <div>
+                <h3 class="font-bold text-sm text-gray-200 mb-3">Core Channel Niches / Pillars</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <h4 class="text-purple-400 text-[10px] font-extrabold uppercase mb-2.5">Monday: Search Lead</h4>
+                    <div class="flex flex-wrap gap-1">
+                      <span class="pillar-tag">"Future Cities 2100"</span>
+                      <span class="pillar-tag">"AI Productivity"</span>
+                    </div>
+                  </div>
+                  <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <h4 class="text-blue-400 text-[10px] font-extrabold uppercase mb-2.5">Friday: Viral Play</h4>
+                    <div class="flex flex-wrap gap-1">
+                      <span class="pillar-tag">"1M Year Forecast"</span>
+                      <span class="pillar-tag">"The Last Human"</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Execution (40%) -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Mini Calendar Widget -->
+            <div class="glass rounded-3xl p-6">
+              <div class="flex justify-between items-center mb-4">
+                <span class="font-bold text-sm text-gray-200 flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> Calendar Widget</span>
+                <span class="text-[10px] text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 font-bold uppercase tracking-wider">May 2026</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1.5 mb-1.5 text-center text-[10px] font-bold text-gray-500 uppercase">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1.5" id="miniCalGrid">
+                <!-- Generated by JS -->
+              </div>
+            </div>
+
+            <!-- Execution Log Tasks -->
+            <div class="glass rounded-3xl p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-gray-100 flex items-center gap-1.5"><i data-lucide="check-square" class="w-4 h-4"></i> Execution Log</h3>
+                <button onclick="triggerAddTaskModal()" class="text-xs text-purple-400 font-bold hover:text-purple-300 transition-all">+ Add Task</button>
+              </div>
+              <div class="space-y-2.5 overflow-y-auto max-h-[340px] pr-1" id="fullChecklist">
+                <!-- Tasks go here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. IDEATION LAB -->
+      <section id="ideation" class="page hidden space-y-6">
+        <!-- Interactive AI Generator Board -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-1 glass rounded-3xl p-6 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="text-lg font-bold mb-1.5 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i> AI Ideation Wizard</h3>
+              <p class="text-xs text-gray-400 mb-4">Provide parameters to generate viral concepts & high CTR outlines instantly.</p>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Target Topic / Keyword</label>
+                  <input id="ideationTopic" type="text" placeholder="e.g. AI Business, No Code SaaS" class="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Viral Tone Angle</label>
+                  <select id="ideationTone" class="w-full bg-slate-900 border border-white/10 px-4 py-3 rounded-xl text-xs outline-none focus:border-purple-500 text-gray-300">
+                    <option value="high-ctr">Sensational / Click-Worthy (High CTR)</option>
+                    <option value="tutorial">Educational Value / SEO (High Retention)</option>
+                    <option value="mystery">Intrigue / Questioning (High Completion)</option>
+                    <option value="provocative">Contrarian / Debunking (High Comments)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Intended Duration</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setIdeaDuration('shorts', this)" class="idea-dur-btn py-2 px-1 rounded-xl text-[10px] font-bold border border-white/10 bg-white/5 text-gray-300">Shorts (&lt;60s)</button>
+                    <button onclick="setIdeaDuration('mid', this)" class="idea-dur-btn py-2 px-1 rounded-xl text-[10px] font-bold border border-purple-500/40 bg-purple-500/10 text-purple-200">Mid (5-10m)</button>
+                    <button onclick="setIdeaDuration('long', this)" class="idea-dur-btn py-2 px-1 rounded-xl text-[10px] font-bold border border-white/10 bg-white/5 text-gray-300">Feature (15m+)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="generateAI_Ideas()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-95 text-xs font-bold py-3 rounded-xl transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4"></i> Compile Viral Concepts
+            </button>
+          </div>
+
+          <!-- Dynamic Generation & Sandbox Area -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="glass rounded-3xl p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-sm text-gray-200 flex items-center gap-2"><i data-lucide="folder-git" class="w-4 h-4 text-purple-400"></i> Suggested Concepts Pool</h4>
+                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">AI Generated Sandbox</span>
+              </div>
+
+              <!-- List of Generated Card Ideas -->
+              <div class="space-y-4" id="ideaGeneratorResults">
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                  <p class="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">Concept #1 • 8.4% Est. CTR</p>
+                  <h4 class="font-bold text-sm text-gray-100">"I Automated my YouTube Channel with AI for 30 Days (And made $5,241)"</h4>
+                  <p class="text-xs text-gray-400 mt-2">Hook outline: Show raw stripe proof in first 3 seconds to lock user engagement. Fast visuals, minimal intro chat.</p>
+                  <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                    <span class="text-[10px] text-gray-400 font-semibold">Niche: AI Productivity</span>
+                    <button onclick="promoteIdeaToPipeline(0)" class="text-[10px] text-purple-300 font-bold hover:underline">Push to Video Pipeline →</button>
+                  </div>
+                </div>
+
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                  <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Concept #2 • 7.1% Est. CTR</p>
+                  <h4 class="font-bold text-sm text-gray-100">"The Truth About No-Code AI Products That Nobody Will Tell You"</h4>
+                  <p class="text-xs text-gray-400 mt-2">Hook outline: Call out popular misinformation right from the thumbnail structure to provoke curiosity clicks.</p>
+                  <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                    <span class="text-[10px] text-gray-400 font-semibold">Niche: Contrarian Tech</span>
+                    <button onclick="promoteIdeaToPipeline(1)" class="text-[10px] text-blue-300 font-bold hover:underline">Push to Video Pipeline →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Title A/B Scoring Sandbox -->
+            <div class="glass rounded-3xl p-6">
+              <h4 class="font-bold text-sm text-gray-200 mb-3 flex items-center gap-1.5"><i data-lucide="line-chart" class="w-4 h-4 text-purple-400"></i> Title Score Analyzer</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <input id="titleAnalyzerInput" oninput="analyzeTitleScore()" type="text" placeholder="Type video title draft to evaluate..." class="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+                  <p class="text-[10px] text-gray-400 mt-1.5">Evaluation parameters: Power words, curiosity density, length optimization, click-friendliness.</p>
+                </div>
+                <div class="md:col-span-1 bg-white/5 rounded-xl border border-white/10 p-4 text-center flex flex-col items-center justify-center">
+                  <p class="text-[10px] text-gray-400 uppercase font-extrabold tracking-widest">Viral Score</p>
+                  <h5 id="titleScoreValue" class="text-3xl font-black text-purple-400 mt-1">45%</h5>
+                  <p id="titleScoreVerdict" class="text-[9px] text-gray-500 font-semibold mt-1 uppercase tracking-wider">NEUTRALLY VIABLE</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. CONTENT CALENDAR (Fully functional dedicated interactive workspace) -->
+      <section id="calendar" class="page hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <!-- Month grid (3 columns) -->
+          <div class="lg:col-span-3 glass rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-purple-400"></i> Content Schedule</h3>
+                <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-xs">
+                  <button onclick="changeCalMonth(-1)" class="hover:text-purple-400"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                  <span id="calendarMonthTitle" class="font-bold min-w-24 text-center">May 2026</span>
+                  <button onclick="changeCalMonth(1)" class="hover:text-purple-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div>
+              </div>
+
+              <!-- Day titles -->
+              <div class="grid grid-cols-7 gap-3 mb-2 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+              </div>
+
+              <!-- Main Calendar Grid -->
+              <div class="grid grid-cols-7 gap-3" id="fullCalGrid">
+                <!-- Generated dynamically by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendar Sidebar detail panel (1 column) -->
+          <div class="lg:col-span-1 glass rounded-3xl p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="border-b border-white/10 pb-4">
+                <p class="text-[10px] text-purple-400 font-extrabold uppercase tracking-widest">Selected Date</p>
+                <h4 class="text-lg font-bold text-gray-100" id="selectedDateText">May 17, 2026</h4>
+              </div>
+
+              <div>
+                <h5 class="text-xs font-bold text-gray-300 mb-3">Release Schedule Overview</h5>
+                <div class="space-y-2.5" id="scheduledVideosList">
+                  <!-- Generated Dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/5">
+              <button onclick="triggerQuickIdea()" class="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> Schedule Video Idea
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. ANALYTICS -->
+      <section id="analytics" class="page hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div class="lg:col-span-3 glass rounded-3xl p-6 space-y-6">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-xl font-bold">Audience Performance Graphs</h3>
+                <p class="text-xs text-gray-400">Comparing target viewer acquisition curves and monthly CPM yields.</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="switchAnalyticsPeriod('7d', this)" class="bg-white/5 border border-white/10 text-xs px-3 py-1.5 rounded-lg text-gray-300 hover:text-white">7d</button>
+                <button onclick="switchAnalyticsPeriod('30d', this)" class="bg-purple-500/20 border border-purple-500/50 text-xs px-3 py-1.5 rounded-lg text-purple-200">30d</button>
+                <button onclick="switchAnalyticsPeriod('6m', this)" class="bg-white/5 border border-white/10 text-xs px-3 py-1.5 rounded-lg text-gray-300 hover:text-white">6m</button>
+              </div>
+            </div>
+
+            <div class="h-80 relative">
+              <canvas id="detailedAnalyticsChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Real-time CTR simulator Widget -->
+          <div class="lg:col-span-1 glass rounded-3xl p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+              <h4 class="font-bold text-sm text-gray-200 flex items-center gap-1.5"><i data-lucide="cpu" class="w-4 h-4 text-purple-400"></i> Viral Predictor</h4>
+              <p class="text-xs text-gray-400">Upload metadata info to simulate standard retention metrics based on search volumes.</p>
+
+              <div class="space-y-3 pt-2">
+                <div>
+                  <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Thumbnail Energy Level</label>
+                  <input type="range" id="simThumb" min="1" max="100" value="70" class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-purple-500" oninput="runSimulateMetrics()" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Hook Density (First 15s)</label>
+                  <input type="range" id="simHook" min="1" max="100" value="85" class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="runSimulateMetrics()" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Niche Competition Level</label>
+                  <input type="range" id="simComp" min="1" max="100" value="45" class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500" oninput="runSimulateMetrics()" />
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center mt-6">
+              <p class="text-[10px] text-gray-400 uppercase font-extrabold tracking-widest">Predicted Impression Rate</p>
+              <h3 class="text-3xl font-black gradient-text mt-1" id="simOutputCtr">142K Views</h3>
+              <p class="text-[9px] text-green-400 font-bold mt-1 uppercase tracking-wider">EXCELLENT CONVERSION PROBABILITY</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Leaderboard list -->
+        <div class="glass rounded-3xl p-6">
+          <h4 class="font-bold text-sm text-gray-200 mb-4">Video-by-Video Breakdown</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-300">
+              <thead class="text-[10px] text-gray-500 uppercase tracking-widest border-b border-white/10">
+                <tr>
+                  <th class="py-3 px-4">Video Title</th>
+                  <th class="py-3 px-4">Impressions</th>
+                  <th class="py-3 px-4">Avg. View Duration</th>
+                  <th class="py-3 px-4">CTR %</th>
+                  <th class="py-3 px-4">Engagement (Likes/Comments)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5" id="analyticsTableBody">
+                <!-- Generated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. AI COACH -->
+      <section id="coach" class="page hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div class="lg:col-span-1 glass rounded-3xl p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+              <h3 class="text-lg font-bold">Workspace Coach</h3>
+              <p class="text-xs text-gray-400">Select pre-configured prompts to debug your growth strategy and thumbnail copy instantly.</p>
+
+              <div class="space-y-2 pt-2">
+                <button onclick="setCoachPrompt('Critique my title: \&quot;I Automated my YouTube Channel with AI\&quot;')" class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-xs p-3 rounded-xl transition-all flex items-center justify-between">
+                  <span>🔍 Critique title structure</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-55"></i>
+                </button>
+                <button onclick="setCoachPrompt('Provide viral hook ideas for a video about AI productivity SaaS.')" class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-xs p-3 rounded-xl transition-all flex items-center justify-between">
+                  <span>💡 Hook generation template</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-55"></i>
+                </button>
+                <button onclick="setCoachPrompt('Explain how I can increase my typical retention from 40% to 55%.')" class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 text-xs p-3 rounded-xl transition-all flex items-center justify-between">
+                  <span>📈 Fix my mid-video retention</span> <i data-lucide="chevron-right" class="w-3.5 h-3.5 opacity-55"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-indigo-950/20 border border-indigo-500/20 p-4 rounded-2xl text-xs space-y-2 mt-6">
+              <p class="font-bold text-indigo-300 flex items-center gap-1"><i data-lucide="bot" class="w-4 h-4"></i> Active Model:</p>
+              <p class="text-gray-400 text-[11px] leading-relaxed">CreatorEngine v4 — fine-tuned on real metrics of channels over 1M subscribers.</p>
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 glass rounded-3xl p-6 flex flex-col justify-between h-[520px]">
+            <div class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" id="chatWindow">
+              <!-- Preset welcome bubbles -->
+              <div class="flex gap-3 max-w-[85%]">
+                <div class="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center font-bold text-xs shrink-0"><i data-lucide="bot" class="w-4 h-4"></i></div>
+                <div class="p-3.5 chat-bubble-ai rounded-2xl text-xs text-gray-300 leading-relaxed">
+                  Hi Alex! I’m your channel growth partner. Give me a title to score, a retention report to audit, or a custom script concept. What are we optimizing today?
+                </div>
+              </div>
+            </div>
+
+            <!-- Input board -->
+            <div class="flex gap-2.5 pt-4 border-t border-white/5">
+              <input id="chatInput" type="text" placeholder="Ask AI Coach for ideas or scripts..." class="flex-1 bg-white/5 border border-white/10 px-4 py-3.5 rounded-xl text-xs outline-none focus:border-purple-500 text-white" onkeydown="if(event.key === 'Enter') sendChatMessage()" />
+              <button onclick="sendChatMessage()" class="bg-purple-600 hover:bg-purple-700 px-5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                <i data-lucide="send" class="w-4 h-4"></i> Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. SETTINGS -->
+      <section id="settings" class="page hidden space-y-6">
+        <div class="glass rounded-3xl p-6 md:p-8 max-w-2xl mx-auto space-y-6">
+          <h2 class="text-xl font-bold border-b border-white/10 pb-4 flex items-center gap-2"><i data-lucide="sliders" class="w-5 h-5 text-purple-400"></i> Profile & Dashboard Configuration</h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-gray-400 font-bold uppercase mb-1.5">Creator Name / Alias</label>
+              <input id="settingUsername" type="text" value="Alex" class="w-full bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 font-bold uppercase mb-1.5">Synced Channel Name</label>
+              <input id="settingChannelName" type="text" value="Alex Tech Labs" class="w-full bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-gray-400 font-bold uppercase mb-1.5">Subscriber Benchmark</label>
+                <input id="settingSubs" type="number" value="124802" class="w-full bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 font-bold uppercase mb-1.5">Est. Monthly Revenue</label>
+                <input id="settingRevenue" type="number" value="14820" class="w-full bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl text-xs outline-none focus:border-purple-500 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-white/10 flex justify-end gap-3">
+            <button onclick="resetSettingsDefault()" class="text-xs text-gray-400 hover:text-white px-4 py-2 rounded-xl border border-white/5 transition-all">Reset Defaults</button>
+            <button onclick="saveCreatorSettings()" class="bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 px-6 py-2.5 rounded-xl text-xs font-bold transition-all">Save Changes</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal elements -->
+<div id="quickTaskModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+  <div class="glass p-6 rounded-3xl w-96 border border-purple-500/30 space-y-4">
+    <h3 class="font-bold text-sm text-purple-300">Create New Growth Task</h3>
+    <div class="space-y-3 text-xs">
+      <div>
+        <label class="block text-gray-400 mb-1">Task Details</label>
+        <input id="modalTaskText" type="text" placeholder="e.g. Brainstorm 3 clickbaity thumbnails" class="w-full bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white outline-none" />
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-1">Select Niche Category</label>
+        <select id="modalTaskCategory" class="w-full bg-slate-900 border border-white/10 px-3 py-2 rounded-xl text-gray-300 outline-none">
+          <option value="Production">🎥 Production</option>
+          <option value="Research">🔬 Research</option>
+          <option value="Marketing">📢 SEO & Marketing</option>
+          <option value="Admin">⚙️ Channel Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 text-xs pt-2">
+      <button onclick="closeTaskModal()" class="text-gray-400 hover:text-white px-3 py-1.5">Cancel</button>
+      <button onclick="submitNewTask()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-1.5 rounded-lg">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<div id="quickIdeaModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+  <div class="glass p-6 rounded-3xl w-[450px] border border-purple-500/30 space-y-4">
+    <h3 class="font-bold text-sm text-purple-300">Fast Concept Sandbox</h3>
+    <div class="space-y-3 text-xs">
+      <div>
+        <label class="block text-gray-400 mb-1">Working Title Draft</label>
+        <input id="modalIdeaTitle" type="text" placeholder="e.g. This New AI Changes Web Design Forever" class="w-full bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white outline-none" />
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-1">Video Niche / Concept Theme</label>
+        <input id="modalIdeaNiche" type="text" placeholder="e.g. AI Coding, Future Tech" class="w-full bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white outline-none" />
+      </div>
+      <div>
+        <label class="block text-gray-400 mb-1">Estimated Conversion CTR %</label>
+        <input id="modalIdeaCtr" type="text" placeholder="e.g. 7.9%" class="w-full bg-white/5 border border-white/10 px-3 py-2 rounded-xl text-white outline-none" />
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 text-xs pt-2">
+      <button onclick="closeIdeaModal()" class="text-gray-400 hover:text-white px-3 py-1.5">Cancel</button>
+      <button onclick="submitNewIdea()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-1.5 rounded-lg">Construct Video</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dynamic Global State Engine
+  const state = {
+    creator: "Alex",
+    channel: "Alex Tech Labs",
+    stats: {
+      subs: 124802,
+      views: "3.8M",
+      revenue: 14820
+    },
+    checklist: [
+      { id: 1, text: "Record footage for AI Automation", completed: true, category: "Production" },
+      { id: 2, text: "Design high CTR variation thumb concepts", completed: false, category: "Marketing" },
+      { id: 3, text: "Audit top competitor's video analytics hook structures", completed: true, category: "Research" },
+      { id: 4, text: "Schedule May sponsor post timeline approvals", completed: false, category: "Admin" }
+    ],
+    ideas: [
+      { id: 1, title: "I Automated my YouTube Channel with AI for 30 Days (And made $5,241)", desc: "Show raw stripe proof in first 3 seconds to lock user engagement. Fast visuals, minimal intro chat.", ctr: "8.4%", niche: "AI Productivity" },
+      { id: 2, title: "The Truth About No-Code AI Products That Nobody Will Tell You", desc: "Call out popular misinformation right from the thumbnail structure to provoke curiosity clicks.", ctr: "7.1%", niche: "Contrarian Tech" }
+    ],
+    pipeline: [
+      { 
+        id: 101, 
+        title: "the EXACT DM strategy I used to get my FIRST clients at 18 (COPY THIS)", 
+        ctr: "8.4%", 
+        niche: "AI Productivity", 
+        stage: 2, 
+        date: "2026-05-18",
+        subtasks: [
+          { name: "Script", assignee: "You", status: "in progress" },
+          { name: "Thumabnil", assignee: "You", status: "in progress" },
+          { name: "record", assignee: "You", status: "in progress" },
+          { name: "video edit", assignee: "You", status: "in progress" }
+        ],
+        delegated: false
+      },
+      { 
+        id: 102, 
+        title: "How 16-Year-Olds are Secretly Stealing Web Traffic with No-Code Tools", 
+        ctr: "9.1%", 
+        niche: "Growth Hacking", 
+        stage: 1, 
+        date: "2026-05-24",
+        subtasks: [
+          { name: "Script", assignee: "You", status: "in progress" },
+          { name: "Thumabnil", assignee: "AI Writer", status: "in progress" },
+          { name: "record", assignee: "You", status: "in progress" },
+          { name: "video edit", assignee: "Unassigned", status: "in progress" }
+        ],
+        delegated: false
+      }
+    ],
+    calendarMonth: 4, // May
+    calendarYear: 2026,
+    selectedDate: "2026-05-17",
+    selectedIdeaDuration: "mid"
+  };
+
+  // Chart instances
+  let growthChartHomeInst = null;
+  let analyticsChartInst = null;
+
+  // Initializing App
+  window.onload = function() {
+    initCharts();
+    renderChecklist();
+    renderMiniCalendar();
+    renderWireframeCalendar();
+    renderCalendarGrid();
+    renderVideoPipeline();
+    runSimulateMetrics();
+    renderAnalyticsTable();
+    syncUIStateValues();
+    lucide.createIcons();
+  };
+
+  // Navigation Logic
+  function showPage(pageId, btnElement) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    
+    // Show select page
+    document.getElementById(pageId).classList.remove('hidden');
+
+    // Remove active styles from navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-nav'));
+    
+    if (btnElement) {
+      btnElement.classList.add('active-nav');
+    } else {
+      // Find navigation button manually to style active state
+      const matchingBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('onclick').includes(pageId));
+      if (matchingBtn) matchingBtn.classList.add('active-nav');
+    }
+
+    // Update Header title
+    let formattedTitle = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+    if (pageId === 'strategy') {
+      formattedTitle = 'Strategy & Goals';
+    } else if (pageId === 'pipeline') {
+      formattedTitle = 'Production & Execution';
+    } else if (pageId === 'ideation') {
+      formattedTitle = 'Ideation';
+    } else if (pageId === 'calendar') {
+      formattedTitle = 'Content Calendar';
+    }
+    
+    document.getElementById('pageTitle').innerText = formattedTitle === 'Home' ? 'Homepage' : formattedTitle + ' Workspace';
+
+    // Synchronize Mobile Select Dropdown if used
+    const mobSelect = document.querySelector('#mobileMenu select');
+    if (mobSelect) { mobSelect.value = pageId; }
+
+    // Re-render chart elements if needed due to sizing issues in display:none blocks
+    if (pageId === 'home') {
+      if (growthChartHomeInst) growthChartHomeInst.resize();
+    } else if (pageId === 'analytics' && analyticsChartInst) {
+      analyticsChartInst.resize();
+    }
+
+    // Refresh Lucide Icons on view switch
+    setTimeout(() => {
+      lucide.createIcons();
+    }, 50);
+  }
+
+  function handleMobileNav(selectElement) {
+    showPage(selectElement.value, null);
+  }
+
+  // Toggle Notifications
+  function toggleNotification() {
+    const el = document.getElementById('notifWidget');
+    el.classList.toggle('hidden');
+  }
+
+  // Sync state values to fields on screens
+  function syncUIStateValues() {
+    document.getElementById('usernameBanner').innerText = state.creator;
+    document.getElementById('channelNameDisplay').innerText = state.channel;
+    document.getElementById('settingUsername').value = state.creator;
+    document.getElementById('settingChannelName').value = state.channel;
+    document.getElementById('statSubs').innerText = state.stats.subs.toLocaleString();
+    document.getElementById('statRev').innerText = "$" + state.stats.revenue.toLocaleString();
+    
+    // Calculate total complete / planned upload statistics
+    const completedCount = state.pipeline.filter(p => p.subtasks.every(s => s.status === 'completed')).length;
+    document.getElementById('mainCircle').dataset.progress = `${completedCount}/7`;
+    
+    // Calculate progress degree
+    const pct = Math.min(100, Math.floor((completedCount / 7) * 100));
+    document.getElementById('mainCircle').style.background = `conic-gradient(#8B5CF6 ${pct}%, rgba(255,255,255,0.08) 0)`;
+
+    // Calculate matrix completion progress (completed/total pipeline count)
+    const activeLength = state.pipeline.length;
+    const finishedLength = state.pipeline.filter(item => item.subtasks.every(s => s.status === 'completed')).length;
+    document.getElementById('matrixStateTracker').innerText = `${finishedLength}/${activeLength}`;
+  }
+
+  function initCharts() {
+    const ctxHome = document.getElementById('growthChartHome').getContext('2d');
+    growthChartHomeInst = new Chart(ctxHome, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Views Target Scale',
+          data: [1.2, 1.8, 2.5, 3.1, 3.8, 4.5],
+          borderColor: '#3B82F6',
+          borderWidth: 3,
+          backgroundColor: 'rgba(59, 130, 246, 0.08)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+        }
+      }
+    });
+
+    const ctx2 = document.getElementById('detailedAnalyticsChart').getContext('2d');
+    analyticsChartInst = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: ['SEO Tutorials', 'Contrarian Tech', 'Viral Play', 'AI Automation', 'Growth Hacking', 'Niche Marketing'],
+        datasets: [{
+          label: 'Impression CTR %',
+          data: [6.4, 7.8, 5.2, 8.4, 9.1, 4.3],
+          backgroundColor: ['#c084fc', '#60a5fa', '#3b82f6', '#8b5cf6', '#06b6d4', '#475569'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  // Toggle tasks completion & Dynamic rendering
+  function renderChecklist() {
+    const listContainer = document.getElementById('fullChecklist');
+    let fullHtml = '';
+
+    state.checklist.forEach(item => {
+      const cardHtml = `
+        <div class="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTaskCompletion(${item.id})" class="w-4.5 h-4.5 rounded text-purple-600 focus:ring-purple-500 bg-white/5 border-white/20" />
+            <span class="task-text text-xs font-semibold ${item.completed ? 'completed text-gray-500' : 'text-gray-200'}">${item.text}</span>
+          </div>
+          <span class="text-[9px] font-extrabold uppercase bg-purple-500/15 border border-purple-500/30 text-purple-300 px-2.5 py-1 rounded-md tracking-widest">${item.category}</span>
+        </div>
+      `;
+      fullHtml += cardHtml;
+    });
+
+    listContainer.innerHTML = fullHtml;
+  }
+
+  function toggleTaskCompletion(taskId) {
+    const target = state.checklist.find(t => t.id === taskId);
+    if (target) {
+      target.completed = !target.completed;
+      renderChecklist();
+    }
+  }
+
+  function triggerAddTaskModal() {
+    document.getElementById('quickTaskModal').classList.remove('hidden');
+  }
+
+  function closeTaskModal() {
+    document.getElementById('quickTaskModal').classList.add('hidden');
+  }
+
+  function submitNewTask() {
+    const valText = document.getElementById('modalTaskText').value;
+    const valCat = document.getElementById('modalTaskCategory').value;
+    
+    if (valText.trim() === '') return;
+
+    state.checklist.push({
+      id: Date.now(),
+      text: valText,
+      completed: false,
+      category: valCat
+    });
+
+    document.getElementById('modalTaskText').value = '';
+    closeTaskModal();
+    renderChecklist();
+    showCustomNotification("Task successfully logged", "Added to Strategy Task Execution board.");
+  }
+
+  function setIdeaDuration(type, btn) {
+    state.selectedIdeaDuration = type;
+    document.querySelectorAll('.idea-dur-btn').forEach(b => {
+      b.classList.remove('border-purple-500/40', 'bg-purple-500/10', 'text-purple-200');
+      b.classList.add('border-white/10', 'bg-white/5', 'text-gray-300');
+    });
+    btn.classList.add('border-purple-500/40', 'bg-purple-500/10', 'text-purple-200');
+  }
+
+  function generateAI_Ideas() {
+    const topic = document.getElementById('ideationTopic').value || "AI Technology";
+    const tone = document.getElementById('ideationTone').value;
+    
+    let generatedMocks = [];
+    
+    if (tone === 'high-ctr') {
+      generatedMocks = [
+        { title: `I Tested ${topic} Tools for 100 Hours (Absolute Chaos)`, desc: `Structure dynamic visual setups of the dashboard showing rapid metrics and immediate income proof. Focus hook layout on failure aspects to maximize click density.`, ctr: "9.2%", niche: topic },
+        { title: `How ${topic} Creators are Legally Cheating Content Velocity`, desc: `A deep-dive critique on standard metadata structures. Keep scripts focused on practical cheat-sheets for maximum retention.`, ctr: "8.7%", niche: topic }
+      ];
+    } else {
+      generatedMocks = [
+        { title: `The Complete ${topic} Handbook: From Idea to $10,000/Mo`, desc: `Step-by-step masterclass framework. Minimal fluff, focus hooks on absolute retention metrics.`, ctr: "6.9%", niche: topic },
+        { title: `5 Unknown Plugins to Master ${topic} Growth Workflow`, desc: `Shorts or mid-video structure breakdown featuring instant side-by-side visual updates.`, ctr: "7.4%", niche: topic }
+      ];
+    }
+
+    state.ideas = generatedMocks;
+    renderGeneratedIdeas();
+    showCustomNotification("Concepts generated", "Engine proposed alternative titles and outline frameworks.");
+  }
+
+  function renderGeneratedIdeas() {
+    const container = document.getElementById('ideaGeneratorResults');
+    let html = '';
+    state.ideas.forEach((idea, index) => {
+      html += `
+        <div class="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+          <p class="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">Concept #${index+1} • ${idea.ctr} Est. CTR</p>
+          <h4 class="font-bold text-sm text-gray-100">${idea.title}</h4>
+          <p class="text-xs text-gray-400 mt-2">${idea.desc}</p>
+          <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+            <span class="text-[10px] text-gray-400 font-semibold">Niche: ${idea.niche}</span>
+            <button onclick="promoteIdeaToPipeline(${index})" class="text-[10px] text-purple-300 font-bold hover:underline">Push to Video Pipeline →</button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  function promoteIdeaToPipeline(index) {
+    const targetIdea = state.ideas[index];
+    if (targetIdea) {
+      state.pipeline.push({
+        id: Date.now(),
+        title: targetIdea.title,
+        ctr: targetIdea.ctr,
+        niche: targetIdea.niche,
+        stage: 0,
+        date: "2026-05-28",
+        subtasks: [
+          { name: "Script", assignee: "You", status: "in progress" },
+          { name: "Thumabnil", assignee: "You", status: "in progress" },
+          { name: "record", assignee: "You", status: "in progress" },
+          { name: "video edit", assignee: "You", status: "in progress" }
+        ],
+        delegated: false
+      });
+      renderVideoPipeline();
+      syncUIStateValues();
+      showCustomNotification("Video Added", "Transferred from Idea Pool directly into Production pipeline!");
+    }
+  }
+
+  // Interactive Title Analyzer algorithm simulation
+  function analyzeTitleScore() {
+    const titleVal = document.getElementById('titleAnalyzerInput').value;
+    const scoreVal = document.getElementById('titleScoreValue');
+    const scoreVerdict = document.getElementById('titleScoreVerdict');
+    
+    if (titleVal.trim() === '') {
+      scoreVal.innerText = '0%';
+      scoreVerdict.innerText = 'WAITING FOR INPUT';
+      return;
+    }
+
+    let points = 25;
+    
+    // Core parameters checks
+    if (titleVal.length > 30 && titleVal.length < 65) points += 20; // optimal character count
+    if (/\d+/.test(titleVal)) points += 15; // presence of metrics/numbers
+    if (/(how|why|what|secrets|reveal|truth|hustle|automated|viral)/i.test(titleVal)) points += 20; // emotional/curiosity trigger hooks
+    if (/\(.*?\)|\[.*?\]/.test(titleVal)) points += 15; // bracket context boost
+    if (titleVal.toUpperCase() === titleVal) points -= 15; // all caps penalty
+
+    points = Math.min(100, Math.max(10, points));
+
+    scoreVal.innerText = `${points}%`;
+    if (points >= 80) {
+      scoreVal.className = "text-3xl font-black text-emerald-400 mt-1";
+      scoreVerdict.innerText = "HIGH VIRAL POTENTIAL";
+      scoreVerdict.className = "text-[9px] text-emerald-400 font-semibold mt-1 uppercase tracking-wider";
+    } else if (points >= 55) {
+      scoreVal.className = "text-3xl font-black text-purple-400 mt-1";
+      scoreVerdict.innerText = "VIABLE STRUCTURE";
+      scoreVerdict.className = "text-[9px] text-purple-400 font-semibold mt-1 uppercase tracking-wider";
+    } else {
+      scoreVal.className = "text-3xl font-black text-rose-400 mt-1";
+      scoreVerdict.innerText = "WEAK CLICK TRIGGER";
+      scoreVerdict.className = "text-[9px] text-rose-400 font-semibold mt-1 uppercase tracking-wider";
+    }
+  }
+
+  function renderMiniCalendar() {
+    const container = document.getElementById('miniCalGrid');
+    let html = '';
+    // May has 31 days. May 1st is Friday
+    for (let i = 1; i <= 31; i++) {
+      const classAttr = i === 17 ? 'cal-date active' : (i === 18 || i === 24) ? 'cal-date has-event' : 'cal-date';
+      html += `<div class="${classAttr}" onclick="selectCalendarDate('2026-05-${i < 10 ? '0' + i : i}')">${i}</div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // Renders the specific wireframe calendar widget block requested in your screenshot mockup
+  function renderWireframeCalendar() {
+    const container = document.getElementById('wireframeCalGrid');
+    if (!container) return;
+    let html = '';
+    
+    // May starts on Friday, so add 5 empty placeholder slots for wireframe visual balancing
+    for (let empty = 0; empty < 5; empty++) {
+      html += `<div class="p-2 text-xs text-gray-500"></div>`;
+    }
+
+    for (let i = 1; i <= 31; i++) {
+      const isSelected = i === 17;
+      const classAttr = isSelected 
+        ? 'bg-purple-600 text-white font-extrabold rounded-lg shadow-md cursor-pointer text-center py-1.5 text-[11px]' 
+        : 'text-gray-400 hover:bg-white/15 font-medium rounded-lg cursor-pointer text-center py-1.5 text-[11px]';
+        
+      html += `<div class="${classAttr}" onclick="selectCalendarDate('2026-05-${i < 10 ? '0' + i : i}')">${i}</div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  function renderCalendarGrid() {
+    const grid = document.getElementById('fullCalGrid');
+    if (!grid) return;
+    const headerTitle = document.getElementById('calendarMonthTitle');
+    headerTitle.innerText = "May 2026";
+    
+    let html = '';
+    
+    // May 2026 starts on Friday (5 empty slots for Sun, Mon, Tue, Wed, Thu)
+    for (let empty = 0; empty < 5; empty++) {
+      html += `<div class="p-4 bg-white/[0.01] rounded-2xl border border-transparent"></div>`;
+    }
+
+    for (let day = 1; day <= 31; day++) {
+      const dateString = `2026-05-${day < 10 ? '0' + day : day}`;
+      const isSelected = dateString === state.selectedDate ? 'border-purple-500 bg-purple-500/15' : 'border-white/5 bg-white/[0.02]';
+      
+      // Match active pipeline releases
+      const targetItems = state.pipeline.filter(p => p.date === dateString);
+      let listSnippet = '';
+      targetItems.forEach(item => {
+        listSnippet += `
+          <div class="mt-2 text-[9px] bg-purple-600/30 text-purple-200 border border-purple-500/30 px-1.5 py-1 rounded truncate font-medium">
+            🎬 ${item.title}
+          </div>
+        `;
+      });
+
+      html += `
+        <div onclick="selectCalendarDate('${dateString}')" class="p-3 rounded-2xl border min-h-24 hover:border-purple-500/50 cursor-pointer transition-all ${isSelected}">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-gray-400">${day}</span>
+            ${targetItems.length > 0 ? '<span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>' : ''}
+          </div>
+          ${listSnippet}
+        </div>
+      `;
+    }
+
+    grid.innerHTML = html;
+  }
+
+  function selectCalendarDate(dateString) {
+    state.selectedDate = dateString;
+    
+    // Parse Date text for sidebar
+    const dateObj = new Date(dateString);
+    const options = { month: 'long', day: 'numeric', year: 'numeric' };
+    document.getElementById('selectedDateText').innerText = dateObj.toLocaleDateString('en-US', options);
+
+    // Refresh Grids
+    renderCalendarGrid();
+    renderDayScheduleDetail(dateString);
+    renderWireframeCalendar();
+  }
+
+  function renderDayScheduleDetail(dateString) {
+    const container = document.getElementById('scheduledVideosList');
+    if (!container) return;
+    const matched = state.pipeline.filter(p => p.date === dateString);
+
+    if (matched.length === 0) {
+      container.innerHTML = `
+        <div class="p-4 bg-white/2 rounded-2xl border border-dashed border-white/10 text-center">
+          <p class="text-[11px] text-gray-500 font-bold">No releases scheduled for today.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    matched.forEach(item => {
+      html += `
+        <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+          <h5 class="font-extrabold text-xs text-gray-100">${item.title}</h5>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-[9px] uppercase font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">${item.niche}</span>
+            <span class="text-[9px] text-gray-400 font-bold">CTR potential: ${item.ctr}</span>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  // Interactive video pipeline layout matching the precise screenshot layout
+  function renderVideoPipeline() {
+    const container = document.getElementById('interactiveVideoPipelineContainer');
+    if (!container) return;
+
+    let html = '';
+    
+    state.pipeline.forEach(item => {
+      html += `
+        <!-- Custom wireframe video planning container matching screenshot wireframe perfectly -->
+        <div class="wireframe-content-box p-6 relative overflow-hidden flex flex-col gap-5 shadow-2xl border border-white/10 transition-all">
+          
+          <!-- Top Row: Horizontal Split Layout (Thumbnail + Subtask Table) -->
+          <div class="flex flex-col lg:flex-row gap-6 items-stretch">
+            
+            <!-- Left Side: Large Coral Pink Image Frame + Title Directly Underneath -->
+            <div class="w-full lg:w-1/3 flex flex-col gap-3">
+              <!-- Coral Pink block -->
+              <div class="w-full h-36 rounded-2xl bg-[#FC8A8A] shrink-0 flex items-center justify-center text-xs font-bold text-red-950 shadow-md">
+                THUMBNAIL PREVIEW
+              </div>
+              
+              <!-- Video Title beneath -->
+              <p class="text-xs font-semibold text-gray-300 leading-relaxed pl-1">
+                <span class="text-purple-400 font-bold">title :- </span>${item.title}
+              </p>
+            </div>
+            
+            <!-- Right Side: Subtasks structured exact-match table layout -->
+            <div class="flex-1 flex flex-col justify-between space-y-2 text-xs">
+              <div class="space-y-1.5 divide-y divide-white/5">
+                ${item.subtasks.map((subtask, index) => {
+                  const initialLetter = subtask.assignee === 'You' ? 'Y' : (subtask.assignee.charAt(0) || 'A');
+                  const statusColor = subtask.status === 'completed' ? 'text-emerald-400' : 'text-amber-400';
+                  const completeClass = subtask.status === 'completed' ? 'line-through opacity-45' : '';
+                  
+                  return `
+                    <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 py-2 first:pt-0">
+                      
+                      <!-- Avatar Badge + Subtask Name -->
+                      <div class="flex items-center gap-3 w-1/4 min-w-[120px]">
+                        <span class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[11px] flex items-center justify-center">
+                          ${initialLetter}
+                        </span>
+                        <span class="font-extrabold text-white text-xs ${completeClass}">${subtask.name}</span>
+                      </div>
+
+                      <!-- Assignment Parameter -->
+                      <div class="text-[11px] text-gray-400 w-1/4">
+                        Assing to :- <span class="font-semibold text-gray-200">${subtask.assignee}</span>
+                      </div>
+
+                      <!-- Status Badge -->
+                      <div class="text-[11px] ${statusColor} font-bold uppercase tracking-wider w-1/6">
+                        ${subtask.status}
+                      </div>
+
+                      <!-- Actions -->
+                      <div class="flex items-center gap-3 text-[11px] font-bold">
+                        <button onclick="toggleSubtaskState(${item.id}, ${index})" class="text-purple-300 hover:text-white transition-all underline">
+                          make / upload
+                        </button>
+                        <button onclick="assignSubtaskToMe(${item.id}, ${index})" class="text-gray-400 hover:text-white transition-colors underline">
+                          assing to us
+                        </button>
+                      </div>
+
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Bottom Footer Operations aligned to bottom right -->
+              <div class="flex items-center justify-end gap-5 pt-3 border-t border-white/5 text-[11px] font-extrabold tracking-wider">
+                <button onclick="deletePipelineItem(${item.id})" class="text-red-400 hover:text-red-300 transition-colors uppercase flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                </button>
                 
-                clearInterval(interval);
-                bootProgress.style.width = '100%';
-                isLoaded = true;
-                setTimeout(() => {
-                    bootScreen.style.opacity = '0';
-                    setTimeout(() => bootScreen.style.display = 'none', 500);
-                }, 400);
-            } catch (e) {
-                console.error("FFmpeg Load Error:", e);
-                clearInterval(interval);
-                loaderMsg.innerHTML = `<span class="text-red-400 font-bold">Engine Load Failed</span>`;
-                errorHelp.classList.remove('hidden');
-            }
-        });
-
-        ffmpeg.setProgress(({ ratio }) => {
-            const p = Math.max(0, Math.min(100, Math.round(ratio * 100)));
-            exportProgress.style.width = p + '%';
-            percentText.innerText = p + '%';
-        });
-
-        mediaDropzone.addEventListener('click', () => videoInput.click());
-        videoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) handleFile(file);
-        });
-
-        function handleFile(file) {
-            currentFile = file;
-            videoElement.src = URL.createObjectURL(file);
-            document.getElementById('media-list').classList.remove('hidden');
-            mediaDropzone.classList.add('hidden');
-            
-            videoElement.onloadedmetadata = () => {
-                totalDuration = videoElement.duration;
-                durationTimeDisplay.innerText = formatTime(totalDuration);
-                trimStart.max = totalDuration;
-                trimEnd.max = totalDuration;
-                trimEnd.value = totalDuration;
-                updateRangeDisplays();
-            };
-        }
-
-        playPauseBtn.addEventListener('click', () => {
-            if (videoElement.paused) {
-                videoElement.play();
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            } else {
-                videoElement.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play pl-1"></i>';
-            }
-        });
-
-        videoElement.addEventListener('timeupdate', () => {
-            currentTimeDisplay.innerText = formatTime(videoElement.currentTime);
-            const progress = (videoElement.currentTime / videoElement.duration) * 100;
-            document.getElementById('timeline-scrub').style.width = `${progress}%`;
-            if (videoElement.currentTime > parseFloat(trimEnd.value)) {
-                videoElement.currentTime = parseFloat(trimStart.value);
-            }
-        });
-
-        function updateRangeDisplays() {
-            startVal.innerText = parseFloat(trimStart.value).toFixed(1);
-            endVal.innerText = parseFloat(trimEnd.value).toFixed(1);
-        }
-
-        trimStart.addEventListener('input', () => {
-            if (parseFloat(trimStart.value) >= parseFloat(trimEnd.value)) trimStart.value = parseFloat(trimEnd.value) - 0.1;
-            videoElement.currentTime = trimStart.value;
-            updateRangeDisplays();
-        });
-
-        trimEnd.addEventListener('input', () => {
-            if (parseFloat(trimEnd.value) <= parseFloat(trimStart.value)) trimEnd.value = parseFloat(trimStart.value) + 0.1;
-            videoElement.currentTime = trimEnd.value;
-            updateRangeDisplays();
-        });
-
-        async function processVideo() {
-            if (!isLoaded || !currentFile) return;
-            
-            const start = trimStart.value;
-            const end = trimEnd.value;
-            const duration = end - start;
-
-            showStatus("Processing (UMD Single-Thread)...", true);
-            exportProgress.style.width = '0%';
-            
-            try {
-                ffmpeg.FS('writeFile', 'input_video', await fetchFile(currentFile));
+                <button onclick="assignAllToUs(${item.id})" class="text-purple-300 hover:text-purple-200 transition-colors uppercase flex items-center gap-1">
+                  <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Assing all us
+                </button>
                 
-                // Optimized command for single thread - ultrafast preset is critical here
-                await ffmpeg.run(
-                    '-ss', `${start}`, 
-                    '-i', 'input_video', 
-                    '-t', `${duration}`, 
-                    '-c:v', 'libx264', 
-                    '-preset', 'ultrafast', 
-                    '-crf', '32',
-                    '-c:a', 'copy',
-                    'output.mp4'
-                );
+                <button onclick="openMockProject('${item.title}')" class="text-gray-300 hover:text-white transition-colors uppercase flex items-center gap-1">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open project
+                </button>
+              </div>
 
-                const data = ffmpeg.FS('readFile', 'output.mp4');
-                const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `clip_${currentFile.name}`;
-                a.click();
+            </div>
 
-                showStatus("Success! Check your downloads.", false);
-                setTimeout(() => statusOverlay.style.display = 'none', 3000);
-            } catch (error) {
-                console.error(error);
-                showStatus("Export Error. Check console logs.", false);
-            }
-        }
+          </div>
 
-        exportBtn.addEventListener('click', processVideo);
-        trimBtn.addEventListener('click', processVideo);
+        </div>
+      `;
+    });
 
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
+    container.innerHTML = html;
+    lucide.createIcons();
+  }
 
-        function showStatus(text, showBar) {
-            statusOverlay.style.display = 'block';
-            statusText.innerText = text;
-            document.querySelector('#status-overlay .progress-bar-bg').style.display = showBar ? 'block' : 'none';
-            percentText.style.display = showBar ? 'block' : 'none';
-        }
+  // Live state actions for specific subtasks
+  function toggleSubtaskState(id, subtaskIndex) {
+    const item = state.pipeline.find(p => p.id === id);
+    if (item && item.subtasks[subtaskIndex]) {
+      const sub = item.subtasks[subtaskIndex];
+      sub.status = sub.status === 'completed' ? 'in progress' : 'completed';
+      renderVideoPipeline();
+      syncUIStateValues();
+      showCustomNotification("Task State Toggled", `"${sub.name}" state updated to ${sub.status}.`);
+    }
+  }
 
-        document.getElementById('btn-forward').addEventListener('click', () => videoElement.currentTime += 5);
-        document.getElementById('btn-backward').addEventListener('click', () => videoElement.currentTime -= 5);
-        document.getElementById('btn-reset').addEventListener('click', () => {
-            trimStart.value = 0;
-            trimEnd.value = totalDuration;
-            updateRangeDisplays();
-        });
-    </script>
+  function assignSubtaskToMe(id, subtaskIndex) {
+    const item = state.pipeline.find(p => p.id === id);
+    if (item && item.subtasks[subtaskIndex]) {
+      item.subtasks[subtaskIndex].assignee = "You";
+      renderVideoPipeline();
+      showCustomNotification("Assigned Subtask", `Assigned "${item.subtasks[subtaskIndex].name}" to You.`);
+    }
+  }
+
+  function assignAllToUs(id) {
+    const item = state.pipeline.find(p => p.id === id);
+    if (item) {
+      item.subtasks.forEach(s => {
+        s.assignee = "You";
+      });
+      renderVideoPipeline();
+      showCustomNotification("Bulk Assigned", "All pipeline subtasks assigned to You.");
+    }
+  }
+
+  function deletePipelineItem(id) {
+    state.pipeline = state.pipeline.filter(p => p.id !== id);
+    renderVideoPipeline();
+    syncUIStateValues();
+    showCustomNotification("Project Deleted", "Removed video project from growth log.");
+  }
+
+  function openMockProject(title) {
+    showCustomNotification("Opening Project Board", `Initializing direct workspace for "${title}"...`);
+  }
+
+  function runSimulateMetrics() {
+    const thumb = parseFloat(document.getElementById('simThumb').value);
+    const hook = parseFloat(document.getElementById('simHook').value);
+    const comp = parseFloat(document.getElementById('simComp').value);
+
+    // Simulated conversion formula
+    const conversionIndex = Math.floor((thumb * 1.5 + hook * 2.0 - comp * 0.8) * 1100);
+    const textOutput = `${conversionIndex.toLocaleString()} Views`;
+    document.getElementById('simOutputCtr').innerText = textOutput;
+  }
+
+  function renderAnalyticsTable() {
+    const tableBody = document.getElementById('analyticsTableBody');
+    if (!tableBody) return;
+    const data = [
+      { title: "I Automated my YouTube Channel with AI", views: "1.2M", avd: "5:20 (62%)", ctr: "8.4%", eng: "84,000" },
+      { title: "The Truth About No-Code AI Products", views: "640K", avd: "3:40 (45%)", ctr: "7.1%", eng: "41,000" },
+      { title: "Future Cities 2100: Living Underground", views: "2.4M", avd: "8:12 (68%)", ctr: "9.2%", eng: "210,000" },
+      { title: "How 16-Year-Olds steal Web Traffic", views: "410K", avd: "4:05 (48%)", ctr: "9.1%", eng: "30,000" }
+    ];
+
+    let html = '';
+    data.forEach(item => {
+      html += `
+        <tr class="hover:bg-white/[0.02] transition-colors">
+          <td class="py-3.5 px-4 font-bold text-gray-100">${item.title}</td>
+          <td class="py-3.5 px-4">${item.views}</td>
+          <td class="py-3.5 px-4 text-purple-300 font-bold">${item.avd}</td>
+          <td class="py-3.5 px-4 text-emerald-400 font-bold">${item.ctr}</td>
+          <td class="py-3.5 px-4 text-gray-400">${item.eng}</td>
+        </tr>
+      `;
+    });
+    tableBody.innerHTML = html;
+  }
+
+  // Quick Action Modal handlers
+  function triggerQuickIdea() {
+    document.getElementById('quickIdeaModal').classList.remove('hidden');
+  }
+
+  function closeIdeaModal() {
+    document.getElementById('quickIdeaModal').classList.add('hidden');
+  }
+
+  function submitNewIdea() {
+    const titleVal = document.getElementById('modalIdeaTitle').value;
+    const nicheVal = document.getElementById('modalIdeaNiche').value || "AI productivity";
+    const ctrVal = document.getElementById('modalIdeaCtr').value || "7.5%";
+
+    if (titleVal.trim() === '') return;
+
+    state.pipeline.push({
+      id: Date.now(),
+      title: titleVal,
+      ctr: ctrVal,
+      niche: nicheVal,
+      stage: 0,
+      date: "2026-05-25",
+      subtasks: [
+        { name: "Script", assignee: "You", status: "in progress" },
+        { name: "Thumabnil", assignee: "You", status: "in progress" },
+        { name: "record", assignee: "You", status: "in progress" },
+        { name: "video edit", assignee: "You", status: "in progress" }
+      ],
+      delegated: false
+    });
+
+    document.getElementById('modalIdeaTitle').value = '';
+    document.getElementById('modalIdeaNiche').value = '';
+    document.getElementById('modalIdeaCtr').value = '';
+    
+    closeIdeaModal();
+    renderVideoPipeline();
+    syncUIStateValues();
+    showCustomNotification("Success", "Idea drafted into Production Flow chart!");
+  }
+
+  // AI chatbot integration
+  function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const msg = chatInput.value;
+    if (msg.trim() === '') return;
+
+    appendBubble(msg, true);
+    chatInput.value = '';
+
+    // Generate responsive typing response simulation
+    setTimeout(() => {
+      let response = "That is an excellent topic idea! To hit premium CTR standards (8%+), avoid technical jargon in the first 10 seconds of your script template. Start directly with a Contrarian thesis to engage your audiences quickly.";
+      if (msg.toLowerCase().includes("retention")) {
+        response = "To boost retention curves past the 50% barrier: Use open visual loops (preview scenes coming up in 2 minutes) at the 45-second point. Also, reduce background transition delays from 3 seconds to 1.5 seconds maximum.";
+      } else if (msg.toLowerCase().includes("critique")) {
+        response = "Reviewing title draft: Very strong power dynamic. Recommend wrapping secondary context details into parentheses at the end to build up authority points (e.g., '(No Coding Needed)').";
+      }
+      appendBubble(response, false);
+    }, 1200);
+  }
+
+  function setCoachPrompt(text) {
+    document.getElementById('chatInput').value = text;
+    sendChatMessage();
+  }
+
+  function appendBubble(text, isUser) {
+    const chatWindow = document.getElementById('chatWindow');
+    const bubble = document.createElement('div');
+    bubble.className = isUser ? 'flex gap-3 max-w-[85%] ml-auto justify-end' : 'flex gap-3 max-w-[85%]';
+    
+    bubble.innerHTML = isUser ? `
+      <div class="p-3.5 chat-bubble-user rounded-2xl text-xs text-white leading-relaxed">
+        ${text}
+      </div>
+      <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-xs shrink-0">A</div>
+    ` : `
+      <div class="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center font-bold text-xs shrink-0"><i data-lucide="bot" class="w-4 h-4"></i></div>
+      <div class="p-3.5 chat-bubble-ai rounded-2xl text-xs text-gray-300 leading-relaxed">
+        ${text}
+      </div>
+    `;
+
+    chatWindow.appendChild(bubble);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    lucide.createIcons();
+  }
+
+  // Global Toast Alert widget implementation
+  function showCustomNotification(header, content) {
+    const list = document.getElementById('notificationList');
+    const newAlert = document.createElement('div');
+    newAlert.className = 'p-2 bg-white/5 rounded-lg border-l-2 border-emerald-500';
+    newAlert.innerHTML = `
+      <p class="font-semibold text-gray-200">${header}</p>
+      <p class="text-[10px] text-gray-400 mt-0.5">${content}</p>
+    `;
+    list.prepend(newAlert);
+    
+    // Toggle active state briefly
+    const toast = document.getElementById('notifWidget');
+    toast.classList.remove('hidden');
+    setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+  }
+
+  // Search filter mechanism
+  function searchFilterEverything() {
+    const val = document.getElementById('globalSearch').value.toLowerCase();
+    
+    // Filter pipeline logic or visual notification
+    showCustomNotification("Filtering view", `Searching dashboard contents for "${val}"...`);
+  }
+
+  // Settings Save function
+  function saveCreatorSettings() {
+    state.creator = document.getElementById('settingUsername').value;
+    state.channel = document.getElementById('settingChannelName').value;
+    state.stats.subs = parseInt(document.getElementById('settingSubs').value);
+    state.stats.revenue = parseInt(document.getElementById('settingRevenue').value);
+
+    syncUIStateValues();
+    showCustomNotification("Settings Synced", "Dashboard assets saved successfully across the cloud profile.");
+  }
+
+  function resetSettingsDefault() {
+    state.creator = "Alex";
+    state.channel = "Alex Tech Labs";
+    state.stats.subs = 124802;
+    state.stats.revenue = 14820;
+
+    syncUIStateValues();
+    showCustomNotification("Defaults Loaded", "Reloaded initial dashboard framework assets.");
+  }
+</script>
 </body>
 </html>
